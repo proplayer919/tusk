@@ -12,6 +12,7 @@ function App() {
   const [evolution, setEvolution] = useState(1)
   const [buttonDisabled, setButtonDisabled] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
+  const [hasClickedOnce, setHasClickedOnce] = useState(false)
 
   // auth state: when false the account dropdown shows Sign In / Register
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -26,6 +27,7 @@ function App() {
 
   function handleClick() {
     setCount(count + 1)
+    setHasClickedOnce(true)
 
     if (count + 1 >= getMaxCount()) {
       setButtonDisabled(true)
@@ -45,9 +47,11 @@ function App() {
       <header className="game-header">
         <h1>Tusk</h1>
 
-        <p className="evolution-label">
-          <IconLabel icon={<IconAward size={20} />}>Evolution {evolution}</IconLabel>
-        </p>
+        {hasClickedOnce && (
+          <p className="evolution-label">
+            <IconLabel icon={<IconAward size={20} />}>Evolution {evolution}</IconLabel>
+          </p>
+        )}
 
         <AccountBadge accountAvatar={!isLoggedIn ? <IconUserCircle size={30} /> : undefined} displayName={!isLoggedIn ? 'Guest' : undefined}>
           {isLoggedIn ? (
