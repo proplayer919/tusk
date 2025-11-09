@@ -1,0 +1,74 @@
+.account-badge {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.account-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: 0;
+  color: var(--text);
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 8px;
+}
+
+.account-toggle:focus {
+  outline: 2px solid var(--primary);
+}
+
+.account-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border);
+}
+
+.account-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.account-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 24px var(--shadow);
+  border-radius: 8px;
+  min-width: 160px;
+  display: flex;
+  flex-direction: column;
+  padding: 0.25rem;
+  z-index: 40;
+}
+
+.account-menu-item {
+  background: transparent;
+  border: 0;
+  text-align: left;
+  padding: 0.6rem 0.8rem;
+  cursor: pointer;
+  border-radius: 6px;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.account-menu-item:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.account-menu-item.logout {
+  color: var(--danger, #d9534f);
+}
+
+@media (max-width: 480px) {
+  .account-name {
+    display: none;
+  }
+}

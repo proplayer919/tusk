@@ -1,0 +1,45 @@
+/* Import Poppins font from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+:root {
+  --bg-dark: #040404;
+  --bg: #0a0a0a;
+  --bg-light: #171717;
+  --text: #f2f2f2;
+  --text-muted: #b0b0b0;
+  --highlight: #646464;
+  --border: #484848;
+  --border-muted: #2e2e2e;
+  --primary: #CC7E85;
+  --secondary: #CF4D6F;
+  --danger: #d7aba2;
+  --warning: #cdc7a9;
+  --success: #8bb89f;
+  --info: #91add2;
+  --shadow: rgba(0, 0, 0, 0.5);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  margin: 0;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+#root {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}

@@ -1,0 +1,19 @@
+.icon-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  /* spacing between icon and label */
+  vertical-align: middle;
+  /* play nicely inside text */
+}
+
+.icon-label__icon {
+  display: inline-flex;
+  line-height: 0;
+  /* avoid extra descender spacing from SVGs */
+}
+
+.icon-label__text {
+  display: inline-flex;
+  align-items: center;
+}

@@ -1,0 +1,73 @@
+.card {
+  border-radius: 8px;
+  padding: 1.5rem;
+  position: relative;
+  background: var(--bg-light);
+  border: 1px solid var(--border-muted);
+  transition: all 0.12s ease-in-out;
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: inherit;
+  opacity: 0;
+  transition: all 0.12s ease-in-out;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.card:hover::before {
+  opacity: 1;
+  top: 0;
+}
+
+.card-content {
+  position: relative;
+  z-index: 1;
+}
+
+.card[role="button"] {
+  cursor: pointer;
+}
+
+.card[role="button"]:active {
+  transform: translateY(2px);
+}
+
+.card-default::before {
+  background: var(--bg-dark);
+  border: 1px solid var(--border);
+}
+
+.card-highlight::before {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  opacity: 0.1;
+}
+
+.card-highlight:hover::before {
+  opacity: 0.15;
+}
+
+.card-danger::before {
+  background: var(--danger);
+  opacity: 0.1;
+}
+
+.card-danger:hover::before {
+  opacity: 0.15;
+}
+
+.card-success::before {
+  background: var(--success);
+  opacity: 0.1;
+}
+
+.card-success:hover::before {
+  opacity: 0.15;
+}

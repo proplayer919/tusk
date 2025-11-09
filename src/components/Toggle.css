@@ -1,0 +1,125 @@
+.toggle-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.toggle-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.toggle {
+  cursor: pointer;
+  outline: none;
+  transition: all 0.12s ease-in-out;
+}
+
+.toggle:focus-visible {
+  box-shadow: 0 0 0 2px var(--primary);
+  border-radius: 20px;
+}
+
+.toggle[aria-checked="true"]:focus-visible {
+  box-shadow: 0 0 0 2px var(--secondary);
+}
+
+.toggle-track {
+  position: relative;
+  border-radius: 20px;
+  width: 44px;
+  height: 24px;
+  background: var(--bg-light);
+  border: 1px solid var(--border-muted);
+  transition: all 0.12s ease-in-out;
+}
+
+.toggle-track-checked {
+  border-color: transparent;
+}
+
+.toggle-thumb {
+  border-radius: 50%;
+  background: var(--text-muted);
+  transition: all 0.12s ease-in-out;
+  position: relative;
+  width: 18px;
+  height: 18px;
+  top: 2px;
+  left: 2px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-thumb::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border-radius: 50%;
+  opacity: 0;
+  transition: all 0.12s ease-in-out;
+  z-index: -1;
+}
+
+.toggle-thumb-checked {
+  left: 22px;
+}
+
+.toggle-thumb-checked::before {
+  opacity: 1;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+/* Variants */
+.toggle-primary .toggle-track-checked {
+  background: var(--primary);
+}
+
+.toggle-primary .toggle-thumb-checked {
+  background: var(--text);
+}
+
+.toggle-primary .toggle-thumb-checked::before {
+  background: var(--secondary);
+}
+
+.toggle-secondary .toggle-track-checked {
+  background: var(--secondary);
+}
+
+.toggle-secondary .toggle-thumb-checked {
+  background: var(--text);
+}
+
+.toggle-secondary .toggle-thumb-checked::before {
+  background: var(--primary);
+}
+
+.toggle-success .toggle-track-checked {
+  background: var(--success);
+}
+
+.toggle-success .toggle-thumb-checked {
+  background: var(--text);
+}
+
+.toggle-success .toggle-thumb-checked::before {
+  background: var(--primary);
+}
+
+/* Disabled state */
+.toggle[tabindex="-1"] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.toggle[tabindex="-1"] .toggle-label {
+  cursor: not-allowed;
+}

@@ -1,0 +1,143 @@
+.progress-container {
+  width: 100%;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.progress-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.progress-value {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.progress-bar {
+  position: relative;
+  width: 100%;
+}
+
+.progress-track {
+  background: var(--bg-light);
+  border: 1px solid var(--border-muted);
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: all 0.3s ease-in-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-fill::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: inherit;
+  transition: all 0.12s ease-in-out;
+  z-index: -1;
+}
+
+.progress-bar:hover .progress-fill::before {
+  top: 0;
+}
+
+/* Sizes */
+.progress-bar-small .progress-track {
+  height: 6px;
+}
+
+.progress-bar-medium .progress-track {
+  height: 8px;
+}
+
+.progress-bar-large .progress-track {
+  height: 12px;
+}
+
+/* Variants */
+.progress-bar-primary .progress-fill {
+  background: var(--primary);
+}
+
+.progress-bar-primary .progress-fill::before {
+  background: var(--secondary);
+}
+
+.progress-bar-secondary .progress-fill {
+  background: var(--secondary);
+}
+
+.progress-bar-secondary .progress-fill::before {
+  background: var(--primary);
+}
+
+.progress-bar-success .progress-fill {
+  background: var(--success);
+}
+
+.progress-bar-success .progress-fill::before {
+  background: var(--primary);
+}
+
+.progress-bar-warning .progress-fill {
+  background: var(--warning);
+}
+
+.progress-bar-warning .progress-fill::before {
+  background: var(--secondary);
+}
+
+.progress-bar-danger .progress-fill {
+  background: var(--danger);
+}
+
+.progress-bar-danger .progress-fill::before {
+  background: var(--primary);
+}
+
+/* Animation */
+.progress-bar-animated .progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background-image: linear-gradient(45deg,
+      rgba(255, 255, 255, 0.1) 25%,
+      transparent 25%,
+      transparent 50%,
+      rgba(255, 255, 255, 0.1) 50%,
+      rgba(255, 255, 255, 0.1) 75%,
+      transparent 75%,
+      transparent);
+  background-size: 20px 20px;
+  animation: progressStripes 1s linear infinite;
+}
+
+@keyframes progressStripes {
+  from {
+    background-position: 0 0;
+  }
+
+  to {
+    background-position: 20px 0;
+  }
+}
