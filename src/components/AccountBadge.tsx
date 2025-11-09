@@ -10,10 +10,12 @@ const NAMES = [
 ]
 
 interface AccountBadgeProps {
-  children?: React.ReactNode
+  children: React.ReactNode
+  accountAvatar?: string | React.ComponentType<any> | React.ReactElement
+  displayName?: string
 }
 
-const AccountBadge: React.FC<AccountBadgeProps> = ({ children }) => {
+const AccountBadge: React.FC<AccountBadgeProps> = ({ children, accountAvatar, displayName }) => {
   const [open, setOpen] = useState(false)
   const [seed] = useState(() => Math.floor(Math.random() * 70) + 1)
   const [name] = useState(() => NAMES[Math.floor(Math.random() * NAMES.length)])
@@ -37,31 +39,8 @@ const AccountBadge: React.FC<AccountBadgeProps> = ({ children }) => {
     }
   }, [])
 
-  const avatar = `https://i.pravatar.cc/40?img=${seed}`
-
-  // Default menu (used when no children provided)
-  function DefaultMenu() {
-    function handleSettings() {
-      alert('Open settings (placeholder)')
-      setOpen(false)
-    }
-
-    function handleLogout() {
-      alert('Logged out (placeholder)')
-      setOpen(false)
-    }
-
-    return (
-      <>
-        <button className="account-menu-item" onClick={handleSettings} role="menuitem">
-          Settings
-        </button>
-        <button className="account-menu-item logout" onClick={handleLogout} role="menuitem">
-          Logout
-        </button>
-      </>
-    )
-  }
+  const avatar = accountAvatar ? accountAvatar : `https://i.pravatar.cc/40?img=${seed}`
+  const displayNameToShow = displayName ? displayName : name
 
   // close the dropdown when a button inside the menu is clicked
   function onMenuClick(e: React.MouseEvent) {
@@ -77,13 +56,21 @@ const AccountBadge: React.FC<AccountBadgeProps> = ({ children }) => {
         aria-haspopup="true"
         aria-expanded={open}
       >
-        <img className="account-avatar" src={avatar} alt="profile" />
-        <span className="account-name">{name}</span>
+        {avatar && typeof avatar === 'string' ? (
+          <img className="account-avatar" src={avatar} alt="profile" />
+        ) : avatar ? (
+          typeof avatar === 'function' ? (
+            React.createElement(avatar)
+          ) : (
+            avatar
+          )
+        ) : null}{' '}
+        <span className="account-name">{displayNameToShow}</span>
       </button>
 
       {open && (
         <div className="account-menu" role="menu" onClick={onMenuClick}>
-          {children ? children : <DefaultMenu />}
+          {children}
         </div>
       )}
     </div>

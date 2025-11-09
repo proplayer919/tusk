@@ -2,7 +2,9 @@ import { useState } from 'react'
 import {
   Button, ProgressBar, Modal, AccountBadge, IconLabel
 } from './components'
-import { IconAward, IconSettings, IconLogout } from '@tabler/icons-react';
+import LoginForm from './components/LoginForm'
+import RegisterForm from './components/RegisterForm'
+import { IconAward, IconSettings, IconLogout, IconLogin, IconUserPlus, IconUserCircle } from '@tabler/icons-react';
 import './App.css'
 
 function App() {
@@ -10,6 +12,13 @@ function App() {
   const [evolution, setEvolution] = useState(1)
   const [buttonDisabled, setButtonDisabled] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
+
+  // auth state: when false the account dropdown shows Sign In / Register
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+  // modals for sign in / register
+  const [signInOpen, setSignInOpen] = useState(false)
+  const [registerOpen, setRegisterOpen] = useState(false)
 
   function getMaxCount() {
     return (evolution * 10) + 40
@@ -40,13 +49,38 @@ function App() {
           <IconLabel icon={<IconAward size={20} />}>Evolution {evolution}</IconLabel>
         </p>
 
-        <AccountBadge>
-          <button className="account-menu-item" onClick={() => alert('Open settings (placeholder)')}>
-            <IconLabel icon={<IconSettings size={20} />}>Settings</IconLabel>
-          </button>
-          <button className="account-menu-item logout" onClick={() => alert('Logged out (placeholder)')}>
-            <IconLabel icon={<IconLogout size={20} />}>Logout</IconLabel>
-          </button>
+        <AccountBadge accountAvatar={!isLoggedIn ? <IconUserCircle size={30} /> : undefined} displayName={!isLoggedIn ? 'Guest' : undefined}>
+          {isLoggedIn ? (
+            <>
+              <button className="account-menu-item" onClick={() => alert('Open settings (placeholder)')}>
+                <IconLabel icon={<IconSettings size={20} />}>Settings</IconLabel>
+              </button>
+              <button
+                className="account-menu-item logout"
+                onClick={() => {
+                  // set logged out and close menu (AccountBadge will close it)
+                  setIsLoggedIn(false)
+                }}
+              >
+                <IconLabel icon={<IconLogout size={20} />}>Logout</IconLabel>
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                className="account-menu-item"
+                onClick={() => setSignInOpen(true)}
+              >
+                <IconLabel icon={<IconLogin size={20} />}>Sign In</IconLabel>
+              </button>
+              <button
+                className="account-menu-item"
+                onClick={() => setRegisterOpen(true)}
+              >
+                <IconLabel icon={<IconUserPlus size={20} />}>Register</IconLabel>
+              </button>
+            </>
+          )}
         </AccountBadge>
       </header>
 
@@ -58,6 +92,37 @@ function App() {
         <p style={{ marginBottom: '1rem' }}>You've reached Evolution {evolution + 1}!</p>
 
         <Button onClick={handleExitModal}>Okay!</Button>
+      </Modal>
+
+      {/* Sign In modal */}
+      <Modal title="Sign In" isOpen={signInOpen} onClose={() => setSignInOpen(false)} size="small">
+        <LoginForm
+          onClose={() => setSignInOpen(false)}
+          onLogin={() => {
+            setIsLoggedIn(true)
+            setSignInOpen(false)
+          }}
+          onSwitchToRegister={() => {
+            setSignInOpen(false)
+            setRegisterOpen(true)
+          }}
+        />
+      </Modal>
+
+      {/* Register modal */}
+      <Modal title="Create account" isOpen={registerOpen} onClose={() => setRegisterOpen(false)} size="small">
+        <RegisterForm
+          onClose={() => setRegisterOpen(false)}
+          onRegister={() => {
+            // Pretend registration also logs the user in
+            setIsLoggedIn(true)
+            setRegisterOpen(false)
+          }}
+          onSwitchToSignIn={() => {
+            setRegisterOpen(false)
+            setSignInOpen(true)
+          }}
+        />
       </Modal>
     </div>
   )
