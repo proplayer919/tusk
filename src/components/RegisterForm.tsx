@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import Input from './Input'
 import Button from './Button'
 import './Form.css'
+import auth from '../services/auth'
 
 interface RegisterFormProps {
   onClose: () => void
@@ -11,16 +12,15 @@ interface RegisterFormProps {
 
 const RegisterForm: React.FC<RegisterFormProps> = ({ onClose, onRegister, onSwitchToSignIn }) => {
   const [username, setUsername] = useState('')
-  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
   const [error, setError] = useState('')
 
-  function handleSubmit(e?: React.FormEvent) {
+  async function handleSubmit(e?: React.FormEvent) {
     if (e) e.preventDefault()
     setError('')
 
-    if (!username.trim() || !email.trim() || !password.trim()) {
+    if (!username.trim() || !password.trim()) {
       setError('Please fill out all required fields.')
       return
     }
@@ -30,8 +30,14 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onClose, onRegister, onSwit
       return
     }
 
-    // Placeholder: pretend registration succeeded
-    onRegister()
+    // call backend
+    try {
+      const body = await auth.register(username.trim(), password)
+      if (body.token) auth.setToken(body.token)
+      onRegister()
+    } catch (err: any) {
+      setError(err.message || 'Registration failed')
+    }
   }
 
   return (
@@ -40,9 +46,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onClose, onRegister, onSwit
         <Input label="Username" placeholder="your handle" value={username} onChange={(e) => setUsername(e.target.value)} />
       </div>
 
-      <div className="form-row">
-        <Input label="Email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
-      </div>
+      {/* removed email requirement: register with username + password */}
 
       <div className="form-row">
         <Input label="Password" type="password" placeholder="Choose a password" value={password} onChange={(e) => setPassword(e.target.value)} />

@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import Input from './Input'
 import Button from './Button'
 import './Form.css'
+import auth from '../services/auth'
 
 interface LoginFormProps {
   onClose: () => void
@@ -10,27 +11,32 @@ interface LoginFormProps {
 }
 
 const LoginForm: React.FC<LoginFormProps> = ({ onClose, onLogin, onSwitchToRegister }) => {
-  const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
 
-  function handleSubmit(e?: React.FormEvent) {
+  async function handleSubmit(e?: React.FormEvent) {
     if (e) e.preventDefault()
     setError('')
 
-    if (!email.trim() || !password.trim()) {
-      setError('Please enter your email and password.')
+    if (!username.trim() || !password.trim()) {
+      setError('Please enter your username and password.')
       return
     }
 
-    // Placeholder: pretend sign-in succeeded
-    onLogin()
+    try {
+      const body = await auth.login(username.trim(), password)
+      if (body.token) auth.setToken(body.token)
+      onLogin()
+    } catch (err: any) {
+      setError(err.message || 'Sign in failed')
+    }
   }
 
   return (
     <form className="form" onSubmit={handleSubmit} noValidate>
       <div className="form-row">
-        <Input label="Email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+        <Input label="Username" placeholder="your handle" value={username} onChange={(e) => setUsername(e.target.value)} />
       </div>
 
       <div className="form-row">

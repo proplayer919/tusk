@@ -1,24 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { IconUserCircle } from '@tabler/icons-react'
 import './AccountBadge.css'
-
-const NAMES = [
-  'Alex Mercer',
-  'Jamie Doe',
-  'Taylor Reed',
-  'Morgan Lane',
-  'Casey North',
-]
 
 interface AccountBadgeProps {
   children: React.ReactNode
-  accountAvatar?: string | React.ComponentType<any> | React.ReactElement
   displayName?: string
 }
 
-const AccountBadge: React.FC<AccountBadgeProps> = ({ children, accountAvatar, displayName }) => {
+const AccountBadge: React.FC<AccountBadgeProps> = ({ children, displayName }) => {
   const [open, setOpen] = useState(false)
-  const [seed] = useState(() => Math.floor(Math.random() * 70) + 1)
-  const [name] = useState(() => NAMES[Math.floor(Math.random() * NAMES.length)])
   const containerRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
@@ -39,8 +29,7 @@ const AccountBadge: React.FC<AccountBadgeProps> = ({ children, accountAvatar, di
     }
   }, [])
 
-  const avatar = accountAvatar ? accountAvatar : `https://i.pravatar.cc/40?img=${seed}`
-  const displayNameToShow = displayName ? displayName : name
+  const displayNameToShow = displayName ? displayName : "User"
 
   // close the dropdown when a button inside the menu is clicked
   function onMenuClick(e: React.MouseEvent) {
@@ -56,15 +45,7 @@ const AccountBadge: React.FC<AccountBadgeProps> = ({ children, accountAvatar, di
         aria-haspopup="true"
         aria-expanded={open}
       >
-        {avatar && typeof avatar === 'string' ? (
-          <img className="account-avatar" src={avatar} alt="profile" />
-        ) : avatar ? (
-          typeof avatar === 'function' ? (
-            React.createElement(avatar)
-          ) : (
-            avatar
-          )
-        ) : null}{' '}
+        <IconUserCircle size={30} />
         <span className="account-name">{displayNameToShow}</span>
       </button>
 

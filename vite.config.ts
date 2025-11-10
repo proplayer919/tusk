@@ -15,4 +15,14 @@ export default defineConfig({
       ],
     },
   })],
+  server: {
+    // proxy API calls to the local Node server during development
+    proxy: {
+      '/api': {
+        target: 'http://localhost:4000',
+        changeOrigin: true,
+        secure: false,
+      }
+    }
+  }
 })
