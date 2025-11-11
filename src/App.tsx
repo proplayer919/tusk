@@ -71,6 +71,7 @@ function App() {
           // token invalid or fetch failed, clear
           auth.setToken(null)
           setIsLoggedIn(false)
+          setIsStaff(false)
           // try to load guest progress instead
           try {
             const saved = await progressService.loadProgress()
@@ -196,6 +197,7 @@ function App() {
                   setIsLoggedIn(false)
                   setServerLoaded(false)
                   setUsername(null)
+                  setIsStaff(false)
                 }}
               >
                 <IconLabel icon={<IconLogout size={20} />}>Logout</IconLabel>
