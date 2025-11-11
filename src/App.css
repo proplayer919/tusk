@@ -46,6 +46,19 @@
   text-align: center;
 }
 
+/* Logo shown in the sidebar. Use a class so the markup stays clean. */
+.game-sidebar h1 .site-logo {
+  height: 120px;
+  display: block;
+  margin: 0 auto;
+  margin-bottom: 1rem;
+  /* Preserve pixel art crispness */
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  image-rendering: -moz-crisp-edges;
+  -webkit-optimize-contrast: 0; /* fallback for some webkit builds */
+}
+
 .evolution-label {
   display: inline-flex;
   align-items: center;

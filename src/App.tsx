@@ -166,7 +166,9 @@ function App() {
       {(!hydrated || (isLoggedIn && !serverLoaded)) && <FullscreenLoader />}
 
       <aside className="game-sidebar">
-        <h1>Tusk</h1>
+        <h1>
+          <img src="/images/logo.png" alt="Tusk" className="site-logo" />
+        </h1>
 
         {hasClickedOnce && (
           <p className="evolution-label">
