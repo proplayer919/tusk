@@ -24,6 +24,7 @@ function App() {
   // auth state: when false the account dropdown shows Sign In / Register
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => !!auth.getToken())
   const [username, setUsername] = useState<string | null>(null)
+  const [isStaff, setIsStaff] = useState<boolean>(false)
 
   // modals for sign in / register
   const [signInOpen, setSignInOpen] = useState(false)
@@ -53,6 +54,7 @@ function App() {
           if (!mounted) return
           setIsLoggedIn(true)
           setUsername(user.username)
+          setIsStaff(Boolean(user.staff))
           const saved = await progressService.loadProgress()
           if (saved) {
             if (typeof saved.count === 'number') setCount(saved.count)
@@ -101,6 +103,7 @@ function App() {
         const user = await auth.getCurrentUser()
         if (!mounted) return
         setUsername(user.username)
+        setIsStaff(Boolean(user.staff))
 
         // Determine server progress: prefer explicit user.progress returned from /api/user
         // If missing, fall back to fetching /api/progress. Also, if guest local progress
@@ -167,7 +170,7 @@ function App() {
           </p>
         )}
 
-        <AccountBadge displayName={!isLoggedIn ? 'Guest' : username ?? undefined}>
+  <AccountBadge displayName={!isLoggedIn ? 'Guest' : username ?? undefined} staff={isStaff}>
           {isLoggedIn ? (
             <>
               <button className="account-menu-item" onClick={() => alert('Open settings (placeholder)')}>

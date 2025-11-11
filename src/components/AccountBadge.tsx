@@ -1,13 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { IconUserCircle } from '@tabler/icons-react'
+import { IconUserCircle, IconTools } from '@tabler/icons-react'
 import './AccountBadge.css'
 
 interface AccountBadgeProps {
   children: React.ReactNode
   displayName?: string
+  staff?: boolean
 }
 
-const AccountBadge: React.FC<AccountBadgeProps> = ({ children, displayName }) => {
+const AccountBadge: React.FC<AccountBadgeProps> = ({ children, displayName, staff }) => {
   const [open, setOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement | null>(null)
 
@@ -46,6 +47,7 @@ const AccountBadge: React.FC<AccountBadgeProps> = ({ children, displayName }) =>
         aria-expanded={open}
       >
         <IconUserCircle size={30} />
+        {staff && <IconTools size={20} className="account-staff-icon" title="Staff" />}
         <span className="account-name">{displayNameToShow}</span>
       </button>
 

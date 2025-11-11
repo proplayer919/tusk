@@ -118,7 +118,7 @@ app.post('/api/register', async (req, res) => {
     await user.save()
 
     const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '30d' })
-    res.json({ token, user: { id: user._id, username: user.username, progress: user.progress } })
+    res.json({ token, user: { id: user._id, username: user.username, progress: user.progress, staff: !!user.staff } })
   } catch (err) {
     console.error(err)
     res.status(500).json({ message: 'server error' })
@@ -138,7 +138,7 @@ app.post('/api/login', async (req, res) => {
     if (!ok) return res.status(401).json({ message: 'invalid credentials' })
 
     const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '30d' })
-    res.json({ token, user: { id: user._id, username: user.username, progress: user.progress } })
+    res.json({ token, user: { id: user._id, username: user.username, progress: user.progress, staff: !!user.staff } })
   } catch (err) {
     console.error(err)
     res.status(500).json({ message: 'server error' })
@@ -150,7 +150,7 @@ app.get('/api/user', authMiddleware, async (req, res) => {
   try {
     const user = await User.findById(req.userId)
     if (!user) return res.status(404).json({ message: 'not found' })
-    res.json({ id: user._id, username: user.username, progress: user.progress })
+    res.json({ id: user._id, username: user.username, progress: user.progress, staff: !!user.staff })
   } catch (err) {
     console.error(err)
     res.status(500).json({ message: 'server error' })

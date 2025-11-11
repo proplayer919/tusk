@@ -33,6 +33,14 @@
   font-weight: 600;
 }
 
+.account-staff-icon {
+  margin-left: 0.1rem;
+  margin-right: -0.4rem;
+  color: var(--accent, #0066ff);
+  display: inline-flex;
+  vertical-align: middle;
+}
+
 .account-menu {
   position: absolute;
   right: 0;
