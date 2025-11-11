@@ -8,6 +8,7 @@ import { IconAward, IconSettings, IconLogout, IconLogin, IconUserPlus } from '@t
 import './App.css'
 import auth from './services/auth'
 import progressService from './services/progress'
+import FullscreenLoader from './components/FullscreenLoader'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -161,6 +162,8 @@ function App() {
 
   return (
     <div className="app">
+      {/* Fullscreen loader while hydrating or waiting for server progress */}
+      {(!hydrated || (isLoggedIn && !serverLoaded)) && <FullscreenLoader />}
       <header className="game-header">
         <h1>Tusk</h1>
 
