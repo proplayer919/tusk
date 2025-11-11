@@ -56,6 +56,23 @@
   z-index: 40;
 }
 
+/* When the badge is placed inside the left sidebar, push it to the bottom
+   and make the dropdown open upwards so it doesn't overflow the sidebar.
+   This also applies on mobile where the sidebar becomes static. */
+.game-sidebar .account-badge {
+  margin-top: auto;
+  /* give a little breathing room from the bottom edge */
+  padding-bottom: 0.5rem;
+}
+
+.game-sidebar .account-badge .account-menu {
+  /* open above the badge instead of below */
+  top: auto;
+  bottom: calc(100% + 8px);
+  right: 0;
+  left: auto;
+}
+
 .account-menu-item {
   background: transparent;
   border: 0;
@@ -75,8 +92,20 @@
   color: var(--danger, #d9534f);
 }
 
+/* On very small screens don't remove the name entirely — truncate it with ellipsis */
 @media (max-width: 480px) {
   .account-name {
-    display: none;
+    display: inline-block;
+    max-width: 6.5rem;
+    /* room for avatar + small name */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.85rem;
+  }
+
+  .account-toggle {
+    gap: 0.4rem;
+    padding: 0.25rem 0.4rem;
   }
 }

@@ -164,7 +164,8 @@ function App() {
     <div className="app">
       {/* Fullscreen loader while hydrating or waiting for server progress */}
       {(!hydrated || (isLoggedIn && !serverLoaded)) && <FullscreenLoader />}
-      <header className="game-header">
+
+      <aside className="game-sidebar">
         <h1>Tusk</h1>
 
         {hasClickedOnce && (
@@ -209,11 +210,13 @@ function App() {
             </>
           )}
         </AccountBadge>
-      </header>
+      </aside>
 
-      <Button onClick={handleClick} disabled={buttonDisabled}>{count ? `You have clicked ${count} times` : 'Click Me!'}</Button>
+      <main className="game-main">
+        <Button onClick={handleClick} disabled={buttonDisabled}>{count ? `You have clicked ${count} times` : 'Click Me!'}</Button>
 
-      <ProgressBar value={count / getMaxCount()} animated />
+        <ProgressBar value={count / getMaxCount()} animated />
+      </main>
 
       <Modal title="Congratulations!" isOpen={modalOpen} onClose={handleExitModal}>
         <p style={{ marginBottom: '1rem' }}>You've reached Evolution {evolution + 1}!</p>

@@ -1,37 +1,57 @@
+:root {
+  --sidebar-width: 320px;
+}
+
 .app {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   min-height: 100vh;
   max-width: 1400px;
   margin: 0 auto;
   padding: 1rem;
+  /* space for the fixed sidebar on wide screens (sidebar width + left gap + internal spacing) */
+  padding-left: calc(var(--sidebar-width) + 2rem);
   gap: 1.5rem;
+  align-items: flex-start;
 }
 
-.game-header {
+.game-sidebar {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 2rem;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
   background: var(--card-bg);
   border-radius: 12px;
   border: 2px solid var(--border);
-  flex-wrap: wrap;
-  gap: 1rem;
+  width: var(--sidebar-width);
+  min-width: 160px;
+  box-sizing: border-box;
+  /* inset from the viewport edges so it doesn't sit flush to the screen */
+  position: fixed;
+  left: 1rem;
+  top: 1rem;
+  bottom: 1rem;
+  height: calc(100vh - 2rem);
+  overflow: auto;
+  z-index: 30;
 }
 
-.game-header h1 {
+.game-sidebar h1 {
   margin: 0;
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: var(--text);
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  text-align: center;
 }
 
 .evolution-label {
   display: inline-flex;
   align-items: center;
   vertical-align: middle;
+  align-self: center;
+  justify-content: center;
   gap: 0.5rem;
   background: var(--bg-light);
   padding: 0.25rem 0.5rem;
@@ -42,18 +62,66 @@
   width: fit-content;
 }
 
+.game-main {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  /* center main content horizontally inside the centered app container */
+  align-items: center;
+}
+
+/* Center main content both vertically and horizontally on wide screens */
+@media (min-width: 769px) {
+  .game-main {
+    justify-content: center;
+    /* vertical centering */
+    min-height: calc(100vh - 2rem);
+    /* match the sidebar inset height */
+    padding: 1rem 0;
+  }
+
+  /* Constrain inner content width so things stay centered and don't stretch edge-to-edge */
+  .game-main>* {
+    width: 100%;
+    max-width: 900px;
+  }
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .app {
+    flex-direction: column;
     padding: 0.5rem;
+    /* remove the left padding introduced for the fixed sidebar on small screens */
+    padding-left: 0;
+    max-width: none;
+    margin: 0;
   }
 
-  .game-header {
-    padding: 1rem;
+  .game-sidebar {
+    width: 100%;
+    min-width: auto;
+    padding: 0.75rem;
     text-align: center;
+    border-radius: 10px;
+    position: static;
+    height: auto;
+    overflow: visible;
   }
 
-  .game-header h1 {
-    font-size: 1.5rem;
+  .game-sidebar h1 {
+    font-size: 1.25rem;
+  }
+
+  .game-main {
+    order: 2;
+  }
+
+  /* On small screens don't force vertical centering */
+  .game-main {
+    justify-content: flex-start;
+    min-height: auto;
+    padding: 0.5rem 0;
   }
 }
