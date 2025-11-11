@@ -7,8 +7,30 @@ const jwt = require('jsonwebtoken')
 const User = require('./models/User')
 
 const app = express()
-app.use(cors())
+app.set('trust proxy', 1) // when behind nginx or another proxy
 app.use(express.json())
+
+// Configure CORS. Set CORS_ORIGIN to a comma-separated list of allowed origins
+// e.g. CORS_ORIGIN="https://example.com,http://localhost:5173"
+const allowedOriginsEnv = process.env.CORS_ORIGIN || ''
+const allowedOrigins = allowedOriginsEnv.split(',').map(s => s.trim()).filter(Boolean)
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like curl, server-to-server)
+    if (!origin) return callback(null, true)
+    if (allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+      return callback(null, true)
+    }
+    return callback(new Error('Not allowed by CORS'))
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  maxAge: 86400
+}
+app.use(cors(corsOptions))
+app.options('*', cors(corsOptions))
+console.log('CORS allowed origins:', allowedOrigins.length ? allowedOrigins : 'all')
 
 const MONGO = process.env.MONGODB_URI || 'mongodb://localhost:27017/tusk'
 const JWT_SECRET = process.env.JWT_SECRET || 'please_change_me'
