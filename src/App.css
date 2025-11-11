@@ -46,7 +46,6 @@
   text-align: center;
 }
 
-/* Logo shown in the sidebar. Use a class so the markup stays clean. */
 .game-sidebar h1 .site-logo {
   height: 120px;
   display: block;
