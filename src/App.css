@@ -5,14 +5,17 @@
 .app {
   display: flex;
   flex-direction: row;
-  min-height: 100vh;
+  /* use percentage height to avoid stacking viewport heights inside #root/body */
+  min-height: 100%;
   max-width: 1400px;
   margin: 0 auto;
-  padding: 1rem;
+  /* move outer spacing into the app container (body padding removed) */
+  padding: 1.25rem;
   /* space for the fixed sidebar on wide screens (sidebar width + left gap + internal spacing) */
   padding-left: calc(var(--sidebar-width) + 2rem);
   gap: 1.5rem;
-  align-items: flex-start;
+  /* vertically center the main content area within the app container */
+  align-items: center;
 }
 
 .game-sidebar {
@@ -91,7 +94,7 @@
   .game-main {
     justify-content: center;
     /* vertical centering */
-    min-height: calc(100vh - 2rem);
+    min-height: calc(100% - 2rem);
     /* match the sidebar inset height */
     padding: 1rem 0;
     /* keep a sensible minimum width so controls (like the main button) don't reflow */

@@ -26,20 +26,32 @@
   font-family: 'Poppins', sans-serif;
 }
 
+/* Make html/body/#root use full height so children using 100% don't force extra scroll
+   Using 100% here avoids stacking multiple min-height:100vh values which can create
+   an extra scrollbar when combined with paddings. */
+html,
+body,
+#root {
+  height: 100%;
+}
+
 body {
   background: var(--bg);
   color: var(--text);
   margin: 0;
-  padding: 20px;
+  /* remove global body padding so percentage heights work predictably
+     move visual spacing into the centered .app container instead */
+  padding: 0;
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
+  /* use percentage to avoid adding extra viewport height on nested elements */
+  min-height: 100%;
 }
 
 #root {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
+  min-height: 100%;
 }
