@@ -54,6 +54,11 @@ function authMiddleware(req, res, next) {
   }
 }
 
+// Redirect from / to https://tusk.proplayer919.dev
+app.get('/', (req, res) => {
+  res.redirect('https://tusk.proplayer919.dev')
+})
+
 // Register
 app.post('/api/register', async (req, res) => {
   try {
