@@ -4,7 +4,7 @@ import {
 } from './components'
 import LoginForm from './components/LoginForm'
 import RegisterForm from './components/RegisterForm'
-import { IconAward, IconSettings, IconLogout, IconLogin, IconUserPlus } from '@tabler/icons-react';
+import { IconAward, IconSettings, IconLogout, IconLogin, IconUserPlus, IconInfoCircle } from '@tabler/icons-react';
 import './App.css'
 import auth from './services/auth'
 import progressService from './services/progress'
@@ -30,6 +30,9 @@ function App() {
   // modals for sign in / register
   const [signInOpen, setSignInOpen] = useState(false)
   const [registerOpen, setRegisterOpen] = useState(false)
+  // global small modals: settings and credits
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  const [creditsOpen, setCreditsOpen] = useState(false)
 
   function getMaxCount() {
     return (evolution * 10) + 40
@@ -179,8 +182,11 @@ function App() {
         <AccountBadge displayName={!isLoggedIn ? 'Guest' : username ?? undefined} staff={isStaff}>
           {isLoggedIn ? (
             <>
-              <button className="account-menu-item" onClick={() => alert('Open settings (placeholder)')}>
+              <button className="account-menu-item" onClick={() => setSettingsOpen(true)}>
                 <IconLabel icon={<IconSettings size={20} />}>Settings</IconLabel>
+              </button>
+              <button className="account-menu-item" onClick={() => setCreditsOpen(true)}>
+                <IconLabel icon={<IconInfoCircle size={20} />}>Credits</IconLabel>
               </button>
               <button
                 className="account-menu-item logout"
@@ -197,6 +203,12 @@ function App() {
             </>
           ) : (
             <>
+              <button className="account-menu-item" onClick={() => setSettingsOpen(true)}>
+                <IconLabel icon={<IconSettings size={20} />}>Settings</IconLabel>
+              </button>
+              <button className="account-menu-item" onClick={() => setCreditsOpen(true)}>
+                <IconLabel icon={<IconInfoCircle size={20} />}>Credits</IconLabel>
+              </button>
               <button
                 className="account-menu-item"
                 onClick={() => setSignInOpen(true)}
@@ -240,6 +252,22 @@ function App() {
             setRegisterOpen(true)
           }}
         />
+      </Modal>
+
+      {/* Settings modal */}
+      <Modal title="Settings" isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} size="small">
+        <p style={{ marginBottom: '1rem' }}>Settings are not implemented yet. This is a placeholder.</p>
+        <Button onClick={() => setSettingsOpen(false)}>Close</Button>
+      </Modal>
+
+      {/* Credits modal */}
+      <Modal title="Credits" isOpen={creditsOpen} onClose={() => setCreditsOpen(false)} size="small">
+        <div style={{ marginBottom: '1rem' }}>
+          <p><strong>Tusk</strong></p>
+          <p>Created by proplayer919.</p>
+          <p>Logo, art, sound effects, and music by Ferretosan.</p>
+        </div>
+        <Button onClick={() => setCreditsOpen(false)}>Close</Button>
       </Modal>
 
       {/* Register modal */}
