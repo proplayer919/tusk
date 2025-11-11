@@ -79,12 +79,19 @@
     min-height: calc(100vh - 2rem);
     /* match the sidebar inset height */
     padding: 1rem 0;
+    /* keep a sensible minimum width so controls (like the main button) don't reflow */
+    min-width: 420px;
   }
 
   /* Constrain inner content width so things stay centered and don't stretch edge-to-edge */
   .game-main>* {
     width: 100%;
     max-width: 900px;
+  }
+
+  /* Give primary controls a stable minimum width to avoid visible jumping */
+  .game-main .btn {
+    min-width: 260px;
   }
 }
 
