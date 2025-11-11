@@ -39,6 +39,32 @@ mongoose.connect(MONGO, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Connected to MongoDB'))
   .catch((err) => console.error('MongoDB connection error', err))
 
+// Ensure parked_names collection exists. This collection controls usernames that may not be registered.
+async function ensureParkedNamesCollection() {
+  try {
+    const db = mongoose.connection.db
+    if (!db) return
+    const coll = await db.listCollections({ name: 'parked_names' }).next()
+    if (!coll) {
+      await db.createCollection('parked_names')
+      // create a unique index on name so entries are unique (case-sensitive index; we'll match case-insensitively when checking)
+      try {
+        await db.collection('parked_names').createIndex({ name: 1 }, { unique: true })
+      } catch (e) {
+        // ignore index creation errors
+      }
+      console.log('Created parked_names collection')
+    }
+  } catch (err) {
+    console.error('Error ensuring parked_names collection', err)
+  }
+}
+
+// Run once after connection established
+mongoose.connection.once('open', () => {
+  ensureParkedNamesCollection()
+})
+
 function authMiddleware(req, res, next) {
   const auth = req.headers.authorization
   if (!auth) return res.status(401).json({ message: 'Missing auth' })
@@ -68,6 +94,19 @@ app.post('/api/register', async (req, res) => {
     // Validate username server-side: 3-20 chars, alphanumeric, underscores and dashes
     const usernamePattern = /^[A-Za-z0-9_-]{3,20}$/
     if (!usernamePattern.test(username)) return res.status(400).json({ message: 'invalid username: must be 3-20 characters and contain only letters, numbers, underscores or dashes' })
+    // Check parked names (case-insensitive exact match)
+    try {
+      const db = mongoose.connection.db
+      if (db) {
+        // escape user input for regex
+        const escapeRegExp = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+        const parked = await db.collection('parked_names').findOne({ name: { $regex: `^${escapeRegExp(username)}$`, $options: 'i' } })
+        if (parked) return res.status(409).json({ message: 'username is reserved/unavailable' })
+      }
+    } catch (err) {
+      // If parked check fails for some reason, log but continue to avoid blocking registrations.
+      console.error('parked names check failed', err)
+    }
 
     const existing = await User.findOne({ username })
     if (existing) return res.status(409).json({ message: 'username already exists' })
