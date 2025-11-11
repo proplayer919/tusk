@@ -24,13 +24,14 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
 }) => {
   const clampedValue = Math.min(Math.max(value, 0), 1);
   const progressClasses = `progress-bar progress-bar-${variant} progress-bar-${size} ${animated ? 'progress-bar-animated' : ''} ${className}`;
+  const currentValue = Math.round(clampedValue * maxValue);
 
   return (
     <div className="progress-container">
       {(label || showValue) && (
         <div className="progress-header">
           {label && <span className="progress-label">{label}</span>}
-          {showValue && <span className="progress-value">{Math.round(clampedValue * 100)}% ({clampedValue * maxValue}/{maxValue})</span>}
+          {showValue && <span className="progress-value">{Math.round(clampedValue * 100)}% ({currentValue}/{maxValue})</span>}
         </div>
       )}
       <div className={progressClasses}>
