@@ -8,6 +8,7 @@ interface ProgressBarProps {
   size?: 'small' | 'medium' | 'large';
   label?: string;
   showValue?: boolean;
+  maxValue?: number;
   animated?: boolean;
 }
 
@@ -18,6 +19,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
   size = 'medium',
   label,
   showValue = false,
+  maxValue = 0,
   animated = false
 }) => {
   const clampedValue = Math.min(Math.max(value, 0), 1);
@@ -28,7 +30,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
       {(label || showValue) && (
         <div className="progress-header">
           {label && <span className="progress-label">{label}</span>}
-          {showValue && <span className="progress-value">{Math.round(clampedValue * 100)}%</span>}
+          {showValue && <span className="progress-value">{Math.round(clampedValue * 100)}% ({clampedValue * maxValue}/{maxValue})</span>}
         </div>
       )}
       <div className={progressClasses}>

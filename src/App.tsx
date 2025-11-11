@@ -215,7 +215,7 @@ function App() {
       <main className="game-main">
         <Button onClick={handleClick} disabled={buttonDisabled}>{count ? `You have clicked ${count} times` : 'Click Me!'}</Button>
 
-        <ProgressBar value={count / getMaxCount()} showValue animated />
+        <ProgressBar value={count / getMaxCount()} showValue maxValue={getMaxCount()} animated />
       </main>
 
       <Modal title="Congratulations!" isOpen={modalOpen} onClose={handleExitModal}>
