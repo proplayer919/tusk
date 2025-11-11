@@ -156,6 +156,47 @@ function App() {
     progressService.saveProgress({ count, evolution, hasClickedOnce })
   }, [count, evolution, hasClickedOnce, hydrated, isLoggedIn, serverLoaded])
 
+  // allow pressing Space to click when the player reaches evolution 15
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      // Only respond to the Space key (avoid interfering with other combos)
+      if (e.code !== 'Space') return
+
+      // Ignore repeats and modifier combos
+      if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return
+
+      // Don't trigger while typing in inputs or editable areas
+      const active = document.activeElement as HTMLElement | null
+      if (active) {
+        const tag = active.tagName
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || active.isContentEditable) return
+      }
+
+      // Only enable this behaviour at evolution 15
+      if (evolution !== 15) return
+
+      // Prevent the default page scroll on Space
+      e.preventDefault()
+
+      // If the main click button is disabled (or modal open), don't click
+      if (buttonDisabled || modalOpen) return
+
+      // Perform a click-like increment using the functional state updater
+      setCount(prev => {
+        const next = prev + 1
+        setHasClickedOnce(true)
+        if (next >= (evolution * 10) + 40) {
+          setButtonDisabled(true)
+          setModalOpen(true)
+        }
+        return next
+      })
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [evolution, buttonDisabled, modalOpen])
+
 
   function handleExitModal() {
     setModalOpen(false)
