@@ -170,7 +170,7 @@ function App() {
           </p>
         )}
 
-  <AccountBadge displayName={!isLoggedIn ? 'Guest' : username ?? undefined} staff={isStaff}>
+        <AccountBadge displayName={!isLoggedIn ? 'Guest' : username ?? undefined} staff={isStaff}>
           {isLoggedIn ? (
             <>
               <button className="account-menu-item" onClick={() => alert('Open settings (placeholder)')}>
