@@ -15,6 +15,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onClose, onRegister, onSwit
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
   const [error, setError] = useState('')
+  const [usernameTouched, setUsernameTouched] = useState(false)
 
   async function handleSubmit(e?: React.FormEvent) {
     if (e) e.preventDefault()
@@ -22,6 +23,13 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onClose, onRegister, onSwit
 
     if (!username.trim() || !password.trim()) {
       setError('Please fill out all required fields.')
+      return
+    }
+
+    // client-side username validation (same rules as server)
+    const usernamePattern = /^[A-Za-z0-9_-]{3,20}$/
+    if (!usernamePattern.test(username.trim())) {
+      setError('Invalid username: must be 3-20 characters and contain only letters, numbers, underscores or dashes')
       return
     }
 
@@ -43,7 +51,17 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onClose, onRegister, onSwit
   return (
     <form className="form" onSubmit={handleSubmit} noValidate>
       <div className="form-row">
-        <Input label="Username" placeholder="your handle" value={username} onChange={(e) => setUsername(e.target.value)} />
+        <Input label="Username" placeholder="your handle" value={username} onChange={(e) => setUsername(e.target.value)} onBlur={() => setUsernameTouched(true)} />
+        {/* helper / validation message */}
+        {usernameTouched && (
+          (() => {
+            const val = username.trim()
+            const usernamePattern = /^[A-Za-z0-9_-]{3,20}$/
+            if (!val) return <div className="form-note">Username should be 3-20 characters: letters, numbers, underscores or dashes.</div>
+            if (!usernamePattern.test(val)) return <div className="form-error">Invalid username format.</div>
+            return <div className="form-note">Looks good.</div>
+          })()
+        )}
       </div>
 
       {/* removed email requirement: register with username + password */}
@@ -60,7 +78,15 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onClose, onRegister, onSwit
 
       <div className="form-actions">
         <Button variant="secondary" onClick={onClose}>Cancel</Button>
-        <Button variant="primary" onClick={handleSubmit}>Create Account</Button>
+        <Button
+          variant="primary"
+          onClick={handleSubmit}
+          disabled={
+            !username.trim() || !password.trim() || password !== confirm || !/^[A-Za-z0-9_-]{3,20}$/.test(username.trim())
+          }
+        >
+          Create Account
+        </Button>
       </div>
 
       <div className="form-footer">

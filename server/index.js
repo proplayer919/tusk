@@ -65,6 +65,10 @@ app.post('/api/register', async (req, res) => {
     const { username, password } = req.body
     if (!username || !password) return res.status(400).json({ message: 'username and password required' })
 
+    // Validate username server-side: 3-20 chars, alphanumeric, underscores and dashes
+    const usernamePattern = /^[A-Za-z0-9_-]{3,20}$/
+    if (!usernamePattern.test(username)) return res.status(400).json({ message: 'invalid username: must be 3-20 characters and contain only letters, numbers, underscores or dashes' })
+
     const existing = await User.findOne({ username })
     if (existing) return res.status(409).json({ message: 'username already exists' })
 
