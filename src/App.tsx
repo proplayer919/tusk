@@ -266,8 +266,8 @@ function App() {
       <Modal title="Credits" isOpen={creditsOpen} onClose={() => setCreditsOpen(false)} size="small">
         <div style={{ marginBottom: '1rem' }}>
           <p><strong>Tusk</strong></p>
-          <p>Created by proplayer919.</p>
-          <p>Logo, art, sound effects, and music by Ferretosan.</p>
+          <p>proplayer919: Creator & Developer</p>
+          <p>Ferretosan: Logo, art, sfx, and music</p>
         </div>
         <Button onClick={() => setCreditsOpen(false)}>Close</Button>
       </Modal>
