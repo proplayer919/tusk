@@ -52,11 +52,14 @@
   display: block;
   margin: 0 auto;
   margin-bottom: 1rem;
+
   /* Preserve pixel art crispness */
   image-rendering: pixelated;
   image-rendering: crisp-edges;
   image-rendering: -moz-crisp-edges;
-  -webkit-optimize-contrast: 0; /* fallback for some webkit builds */
+
+  /* fallback for some webkit builds */
+  -webkit-optimize-contrast: 0;
 }
 
 .evolution-label {
