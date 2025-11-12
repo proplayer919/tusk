@@ -1,0 +1,50 @@
+.settings-root {
+  display: flex;
+  gap: 1rem;
+  min-width: 480px;
+}
+
+.settings-sidebar {
+  width: 140px;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 0.25rem;
+}
+
+.settings-tab {
+  background: none;
+  border: none;
+  padding: 0.75rem 0.5rem;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 4px;
+  margin: 0.125rem 0;
+  color: var(--text)
+}
+
+.settings-tab .tab-icon {
+  vertical-align: middle;
+  margin-right: 0.5rem;
+  color: var(--text);
+}
+
+.settings-tab span {
+  vertical-align: middle;
+}
+
+.settings-tab.active {
+  background: var(--bg-light);
+  font-weight: 600;
+}
+
+.settings-content {
+  padding: 0.5rem 0.25rem;
+  flex: 1;
+}
+
+.settings-hint {
+  margin-top: 0.5rem;
+  color: var(--text);
+  font-size: 0.9rem;
+}

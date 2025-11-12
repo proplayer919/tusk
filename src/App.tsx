@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
 import {
-  Button, Card, ProgressBar, Modal, IconLabel, SidebarButton, StaffPanel
+  Button, Card, ProgressBar, Modal, IconLabel, SidebarButton, StaffPanel, SettingsPanel
 } from './components'
 import LoginForm from './components/LoginForm'
 import RegisterForm from './components/RegisterForm'
 import { IconAward, IconSettings, IconLogout, IconLogin, IconUserPlus, IconStar, IconUserCircle, IconTools, IconBrandGithub, IconMail } from '@tabler/icons-react';
 import './App.css'
 import auth from './services/auth'
+import settingsService from './services/settings'
 import progressService from './services/progress'
 import FullscreenLoader from './components/FullscreenLoader'
 
@@ -35,6 +36,8 @@ function App() {
   // global small modals: settings and credits
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [creditsOpen, setCreditsOpen] = useState(false)
+  // application settings (persisted to localStorage)
+  const [settings, setSettings] = useState(() => settingsService.loadSettings())
 
   function getMaxCount() {
     return (evolution * 10) + 40
@@ -203,7 +206,14 @@ function App() {
 
       <aside className="game-sidebar">
         <h1>
-          <img src="/images/logo.png" alt="Tusk" className="site-logo" />
+          {/* Show the festive logo when enabled and in December (or forced via advanced settings) */}
+          {(() => {
+            const now = new Date()
+            const isDecember = now.getMonth() === 11
+            const showFestive = settings.festiveEnabled && (isDecember || settings.festiveOverride)
+            const src = showFestive ? '/images/festive%20logo.png' : '/images/logo.png'
+            return <img src={src} alt="Tusk" className="site-logo" />
+          })()}
         </h1>
 
         {hasClickedOnce && (
@@ -295,9 +305,11 @@ function App() {
       </Modal>
 
       {/* Settings modal */}
-      <Modal title="Settings" isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} size="small">
-        <p style={{ marginBottom: '1rem' }}>Settings are not implemented yet. This is a placeholder.</p>
-        <Button onClick={() => setSettingsOpen(false)}>Close</Button>
+      <Modal title="Settings" isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} size="medium">
+        <SettingsPanel settings={settings} onChange={(s) => {
+          setSettings(s)
+          settingsService.saveSettings(s)
+        }} />
       </Modal>
 
       {/* Credits modal */}
