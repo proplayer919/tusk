@@ -24,7 +24,11 @@ const StaffPanel: React.FC<StaffPanelProps> = ({ isOpen, onClose }) => {
   const [users, setUsers] = useState<UserSummary[]>([])
   const [selected, setSelected] = useState<UserSummary | null>(null)
   const [progressMap, setProgressMap] = useState<Record<string, string>>({})
-  const [loading, setLoading] = useState(false)
+
+  // split list vs detail loading to avoid re-rendering/shaking the list when
+  // fetching single user details
+  const [listLoading, setListLoading] = useState(false)
+  const [detailLoading, setDetailLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'details' | 'progress'>('details')
@@ -36,7 +40,7 @@ const StaffPanel: React.FC<StaffPanelProps> = ({ isOpen, onClose }) => {
   }, [isOpen])
 
   async function load() {
-    setLoading(true)
+    setListLoading(true)
     setError(null)
     try {
       const res = await staffService.listUsers(q || undefined, page, 50)
@@ -44,7 +48,7 @@ const StaffPanel: React.FC<StaffPanelProps> = ({ isOpen, onClose }) => {
     } catch (err: any) {
       setError(err.message || 'Failed to load users')
     } finally {
-      setLoading(false)
+      setListLoading(false)
     }
   }
 
@@ -55,7 +59,12 @@ const StaffPanel: React.FC<StaffPanelProps> = ({ isOpen, onClose }) => {
   }
 
   async function selectUser(id: string) {
-    setLoading(true)
+    // if already selected, no need to reload the list or refetch unless you
+    // want to refresh details. Avoid reselect causing the left list to show
+    // loading indicator which produces the "shaking" effect.
+    if (selected && selected.id === id) return
+
+    setDetailLoading(true)
     setError(null)
     try {
       const u = await staffService.getUser(id)
@@ -75,7 +84,7 @@ const StaffPanel: React.FC<StaffPanelProps> = ({ isOpen, onClose }) => {
     } catch (err: any) {
       setError(err.message || 'Failed to load user')
     } finally {
-      setLoading(false)
+      setDetailLoading(false)
     }
   }
 
@@ -144,9 +153,9 @@ const StaffPanel: React.FC<StaffPanelProps> = ({ isOpen, onClose }) => {
           </form>
 
           <div className="staff-list">
-            {loading && <div className="staff-loading">Loading...</div>}
+            {listLoading && <div className="staff-loading">Loading...</div>}
             {error && <div className="staff-error">{error}</div>}
-            {!loading && users.length === 0 && <div className="staff-empty">No users</div>}
+            {!listLoading && users.length === 0 && <div className="staff-empty">No users</div>}
             <ul>
               {users.map(u => (
                 <li key={u.id} className={selected && selected.id === u.id ? 'selected' : ''} onClick={() => selectUser(u.id)}>
@@ -161,8 +170,9 @@ const StaffPanel: React.FC<StaffPanelProps> = ({ isOpen, onClose }) => {
         </div>
 
         <div className="staff-panel-right">
-          {!selected && <div className="staff-empty-detail">Select a user to view/edit details</div>}
-          {selected && (
+          {detailLoading && <div className="staff-empty-detail">Loading user details...</div>}
+          {!detailLoading && !selected && <div className="staff-empty-detail">Select a user to view/edit details</div>}
+          {!detailLoading && selected && (
             <div className="staff-detail">
               <div className="staff-detail-top">
                 <div className="staff-detail-header">
