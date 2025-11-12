@@ -5,15 +5,19 @@
 .app {
   display: flex;
   flex-direction: row;
+
   /* use percentage height to avoid stacking viewport heights inside #root/body */
   min-height: 100%;
   max-width: 1400px;
   margin: 0 auto;
+
   /* move outer spacing into the app container (body padding removed) */
   padding: 1.25rem;
+
   /* space for the fixed sidebar on wide screens (sidebar width + left gap + internal spacing) */
   padding-left: calc(var(--sidebar-width) + 2rem);
   gap: 1.5rem;
+
   /* vertically center the main content area within the app container */
   align-items: center;
 }
@@ -30,6 +34,7 @@
   width: var(--sidebar-width);
   min-width: 160px;
   box-sizing: border-box;
+
   /* inset from the viewport edges so it doesn't sit flush to the screen */
   position: fixed;
   left: 1rem;
@@ -54,6 +59,7 @@
   display: block;
   margin: 0 auto;
   margin-bottom: 1rem;
+  user-select: none;
 
   /* Preserve pixel art crispness */
   image-rendering: pixelated;
@@ -78,6 +84,7 @@
   color: var(--primary);
   border: 1px solid var(--border);
   width: fit-content;
+  user-select: none;
 }
 
 .game-main {
