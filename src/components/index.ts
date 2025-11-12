@@ -5,5 +5,5 @@ export { default as Badge } from './Badge';
 export { default as Modal } from './Modal';
 export { default as Toggle } from './Toggle';
 export { default as ProgressBar } from './ProgressBar';
-export { default as AccountBadge } from './AccountBadge';
 export { default as IconLabel } from './IconLabel';
+export { default as SidebarButton } from './SidebarButton';

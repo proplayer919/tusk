@@ -89,6 +89,23 @@
   align-items: center;
 }
 
+/* Styles for the inlined account area at the bottom of the sidebar */
+.sidebar-account-section {
+  margin-top: auto;
+  padding-bottom: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.account-staff-icon {
+  margin-left: 0.1rem;
+  margin-right: 0.1rem;
+  color: var(--accent, #0066ff);
+  display: inline-flex;
+  vertical-align: middle;
+}
+
 /* Center main content both vertically and horizontally on wide screens */
 @media (min-width: 769px) {
   .game-main {

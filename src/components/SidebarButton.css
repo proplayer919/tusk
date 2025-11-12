@@ -1,0 +1,46 @@
+.sidebar-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: transparent;
+  border: 0;
+  color: var(--text);
+  cursor: pointer;
+  padding-bottom: 0.6rem;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: background 120ms ease;
+  text-align: left;
+  width: 100%;
+  font-size: 1rem;
+}
+
+/* IconLabel wraps the icon and the text; ensure it flows nicely */
+.sidebar-button:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.sidebar-button.danger {
+  color: var(--danger, #d9534f);
+}
+
+/* Ensure labels truncate on tiny screens */
+.sidebar-button .icon-label>span {
+  display: inline-block;
+  vertical-align: middle;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Special cases */
+.logout {
+  color: var(--danger, #d9534f);
+}
+
+@media (max-width: 480px) {
+  .sidebar-button {
+    padding: 0.5rem 0.6rem;
+    font-weight: 600;
+  }
+}

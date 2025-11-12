@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import {
-  Button, ProgressBar, Modal, AccountBadge, IconLabel
+  Button, ProgressBar, Modal, IconLabel, SidebarButton
 } from './components'
 import LoginForm from './components/LoginForm'
 import RegisterForm from './components/RegisterForm'
-import { IconAward, IconSettings, IconLogout, IconLogin, IconUserPlus, IconInfoCircle } from '@tabler/icons-react';
+import { IconAward, IconSettings, IconLogout, IconLogin, IconUserPlus, IconStar, IconUserCircle, IconTools } from '@tabler/icons-react';
 import './App.css'
 import auth from './services/auth'
 import progressService from './services/progress'
@@ -221,52 +221,50 @@ function App() {
           </p>
         )}
 
-        <AccountBadge displayName={!isLoggedIn ? 'Guest' : username ?? undefined} staff={isStaff}>
+        {/* Inlined account area: styled buttons and account row at the bottom */}
+        <div className="sidebar-account-section">
           {isLoggedIn ? (
             <>
-              <button className="account-menu-item" onClick={() => setSettingsOpen(true)}>
-                <IconLabel icon={<IconSettings size={20} />}>Settings</IconLabel>
-              </button>
-              <button className="account-menu-item" onClick={() => setCreditsOpen(true)}>
-                <IconLabel icon={<IconInfoCircle size={20} />}>Credits</IconLabel>
-              </button>
-              <button
-                className="account-menu-item logout"
-                onClick={() => {
-                  // logout
-                  auth.setToken(null)
-                  setIsLoggedIn(false)
-                  setServerLoaded(false)
-                  setUsername(null)
-                  setIsStaff(false)
-                }}
-              >
-                <IconLabel icon={<IconLogout size={20} />}>Logout</IconLabel>
-              </button>
+              <SidebarButton icon={<IconSettings size={25} />} onClick={() => setSettingsOpen(true)}>
+                Settings
+              </SidebarButton>
+              <SidebarButton icon={<IconStar size={25} />} onClick={() => setCreditsOpen(true)}>
+                Credits
+              </SidebarButton>
+              <SidebarButton icon={<IconLogout size={25} />} onClick={() => {
+                auth.setToken(null)
+                setIsLoggedIn(false)
+                setServerLoaded(false)
+                setUsername(null)
+                setIsStaff(false)
+              }} danger>
+                Logout
+              </SidebarButton>
+              <SidebarButton icon={<IconUserCircle size={25} />}>
+                {isStaff && <IconTools size={20} className="account-staff-icon" title="Staff" />}
+                {username}
+              </SidebarButton>
             </>
           ) : (
             <>
-              <button className="account-menu-item" onClick={() => setSettingsOpen(true)}>
-                <IconLabel icon={<IconSettings size={20} />}>Settings</IconLabel>
-              </button>
-              <button className="account-menu-item" onClick={() => setCreditsOpen(true)}>
-                <IconLabel icon={<IconInfoCircle size={20} />}>Credits</IconLabel>
-              </button>
-              <button
-                className="account-menu-item"
-                onClick={() => setSignInOpen(true)}
-              >
-                <IconLabel icon={<IconLogin size={20} />}>Sign In</IconLabel>
-              </button>
-              <button
-                className="account-menu-item"
-                onClick={() => setRegisterOpen(true)}
-              >
-                <IconLabel icon={<IconUserPlus size={20} />}>Register</IconLabel>
-              </button>
+              <SidebarButton icon={<IconSettings size={25} />} onClick={() => setSettingsOpen(true)}>
+                Settings
+              </SidebarButton>
+              <SidebarButton icon={<IconStar size={25} />} onClick={() => setCreditsOpen(true)}>
+                Credits
+              </SidebarButton>
+              <SidebarButton icon={<IconLogin size={25} />} onClick={() => setSignInOpen(true)}>
+                Sign In
+              </SidebarButton>
+              <SidebarButton icon={<IconUserPlus size={25} />} onClick={() => setRegisterOpen(true)}>
+                Register
+              </SidebarButton>
+              <SidebarButton icon={<IconUserCircle size={25} />}>
+                Guest
+              </SidebarButton>
             </>
           )}
-        </AccountBadge>
+        </div>
       </aside>
 
       <main className="game-main">
