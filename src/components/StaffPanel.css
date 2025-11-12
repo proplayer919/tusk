@@ -150,24 +150,6 @@
   margin-bottom: 0.25rem;
 }
 
-.staff-detail-row .mono {
-  font-family: monospace;
-  background: var(--bg-light);
-  padding: 0.25rem;
-  border-radius: 4px;
-}
-
-.checkbox-input {
-  transform: scale(1.1);
-}
-
-.progress-editor {
-  background: var(--bg);
-  padding: 0.75rem;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-}
-
 .progress-simple {
   background: var(--bg);
   padding: 0.75rem;
@@ -196,85 +178,6 @@
   margin-bottom: 0.5rem
 }
 
-.progress-empty {
-  color: var(--text);
-  padding: 0.5rem
-}
-
-.progress-fields {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem
-}
-
-.progress-field {
-  display: flex;
-  gap: 0.5rem;
-  align-items: flex-start
-}
-
-.progress-key {
-  width: 140px;
-  padding: 0.4rem;
-  border-radius: 6px;
-  border: 1px solid var(--border);
-  background: var(--bg);
-  color: var(--text);
-  font-weight: 600
-}
-
-.progress-val {
-  flex: 1;
-  min-height: 56px;
-  padding: 0.5rem;
-  border-radius: 6px;
-  border: 1px solid var(--border);
-  font-family: monospace;
-  resize: vertical
-}
-
-.field-remove {
-  background: transparent;
-  border: 1px solid transparent;
-  color: var(--danger);
-  padding: 0.2rem 0.5rem;
-  border-radius: 6px;
-  cursor: pointer
-}
-
-.add-field-row {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 0.6rem
-}
-
-.add-key,
-.add-val {
-  padding: 0.45rem;
-  border-radius: 6px;
-  border: 1px solid var(--border);
-  background: var(--bg);
-  color: var(--text);
-}
-
-.add-key {
-  width: 140px;
-  font-weight: 600
-}
-
-.add-val {
-  flex: 1
-}
-
-.add-btn {
-  background: var(--primary);
-  color: var(--text);
-  border: none;
-  padding: 0.45rem 0.6rem;
-  border-radius: 6px;
-  cursor: pointer
-}
-
 .staff-error {
   color: var(--danger);
   margin: 0.5rem 0
@@ -284,15 +187,6 @@
 .staff-empty-detail {
   color: var(--text);
   padding: 1rem
-}
-
-textarea {
-  width: 100%;
-  font-family: monospace;
-  font-size: 14px;
-  color: var(--text);
-  background: var(--bg);
-  border: none;
 }
 
 .staff-loading {

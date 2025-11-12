@@ -178,7 +178,7 @@ const StaffPanel: React.FC<StaffPanelProps> = ({ isOpen, onClose }) => {
                 <div className="staff-detail-header">
                   <div>
                     <h3 className="user-title">{selected.username}</h3>
-                    <div className="user-sub">{selected.staff ? 'Staff account' : 'Regular user'} • <span className="mono">{selected.id}</span></div>
+                    <div className="user-sub">{selected.staff ? 'Staff account' : 'Regular user'}</div>
                   </div>
                   <div className="staff-detail-actions">
                     <Button onClick={saveUser} disabled={saving}>Save</Button>
