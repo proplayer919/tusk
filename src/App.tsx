@@ -324,7 +324,7 @@ function App() {
               avatar: <IconUserCircle size={40} />,
               links: [
                 { href: 'https://github.com/Ferretosan', icon: <IconBrandGithub size={16} /> },
-                { href: 'mailto:ferret@disroot.org', icon: <IconMail size={16} /> }
+                { href: 'mailto:me@ferretosan.com', icon: <IconMail size={16} /> }
               ]
             }
           ].map(person => (
