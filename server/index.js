@@ -133,13 +133,21 @@ async function authMiddleware(req, res, next) {
 
     if (!user) return res.status(401).json({ message: 'Invalid token (user not found)' })
 
-    // Attach both identifiers for downstream handlers
+    // Attach both identifiers and the full user document for downstream handlers
     req.userId = user._id
     req.userUuid = user.uuid
+    req.user = user
     next()
   } catch (err) {
     return res.status(401).json({ message: 'Invalid token' })
   }
+}
+
+// Middleware to require staff flag on the authenticated user
+async function staffOnly(req, res, next) {
+  if (!req.user) return res.status(401).json({ message: 'Missing user' })
+  if (!req.user.staff) return res.status(403).json({ message: 'staff only' })
+  next()
 }
 
 // Redirect from / to https://tusk.proplayer919.dev
@@ -245,6 +253,91 @@ app.post('/api/progress', authMiddleware, async (req, res) => {
     const { progress } = req.body
     await User.findByIdAndUpdate(req.userId, { progress }, { new: true })
     res.json({ ok: true })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ message: 'server error' })
+  }
+})
+
+// --- Staff endpoints: view/search/edit users ---
+// List users with optional search query (q) that matches username or uuid. Paginated.
+app.get('/api/staff/users', authMiddleware, staffOnly, async (req, res) => {
+  try {
+    const q = (req.query.q || '').toString().trim()
+    const page = Math.max(1, parseInt((req.query.page || '1').toString(), 10) || 1)
+    const limit = Math.min(200, Math.max(10, parseInt((req.query.limit || '50').toString(), 10) || 50))
+    const filter = {}
+    if (q) {
+      // case-insensitive contains on username, or exact uuid match
+      filter.$or = [
+        { username: { $regex: q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), $options: 'i' } },
+        { uuid: q }
+      ]
+    }
+
+    const skip = (page - 1) * limit
+    const total = await User.countDocuments(filter)
+    const users = await User.find(filter).sort({ username: 1 }).skip(skip).limit(limit).lean()
+    // Return safe fields only
+    const safe = users.map(u => ({ id: u.uuid, username: u.username, progress: u.progress || {}, staff: !!u.staff, createdAt: u.createdAt, updatedAt: u.updatedAt }))
+    res.json({ total, page, limit, users: safe })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ message: 'server error' })
+  }
+})
+
+// Get single user by uuid
+app.get('/api/staff/user/:id', authMiddleware, staffOnly, async (req, res) => {
+  try {
+    const id = req.params.id
+    const user = await User.findOne({ uuid: id }).lean()
+    if (!user) return res.status(404).json({ message: 'not found' })
+    const safe = { id: user.uuid, username: user.username, progress: user.progress || {}, staff: !!user.staff, createdAt: user.createdAt, updatedAt: user.updatedAt }
+    res.json(safe)
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ message: 'server error' })
+  }
+})
+
+// Update user fields (username, progress, staff)
+app.put('/api/staff/user/:id', authMiddleware, staffOnly, async (req, res) => {
+  try {
+    const id = req.params.id
+    const { username, progress, staff } = req.body
+    const update = {}
+    if (typeof username === 'string') update.username = username
+    if (typeof progress !== 'undefined') update.progress = progress
+    if (typeof staff !== 'undefined') update.staff = !!staff
+
+    // If updating username, validate pattern
+    if (update.username) {
+      const usernamePattern = /^[A-Za-z0-9_-]{3,20}$/
+      if (!usernamePattern.test(update.username)) return res.status(400).json({ message: 'invalid username' })
+      const existing = await User.findOne({ username: update.username })
+      if (existing && existing.uuid !== id) return res.status(409).json({ message: 'username already exists' })
+    }
+
+    const user = await User.findOneAndUpdate({ uuid: id }, update, { new: true }).lean()
+    if (!user) return res.status(404).json({ message: 'not found' })
+    const safe = { id: user.uuid, username: user.username, progress: user.progress || {}, staff: !!user.staff, createdAt: user.createdAt, updatedAt: user.updatedAt }
+    res.json(safe)
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ message: 'server error' })
+  }
+})
+
+// Reset user to defaults (clears progress and non-required flags)
+app.post('/api/staff/user/:id/reset', authMiddleware, staffOnly, async (req, res) => {
+  try {
+    const id = req.params.id
+    const defaults = { progress: {} }
+    const user = await User.findOneAndUpdate({ uuid: id }, defaults, { new: true }).lean()
+    if (!user) return res.status(404).json({ message: 'not found' })
+    const safe = { id: user.uuid, username: user.username, progress: user.progress || {}, staff: !!user.staff, createdAt: user.createdAt, updatedAt: user.updatedAt }
+    res.json(safe)
   } catch (err) {
     console.error(err)
     res.status(500).json({ message: 'server error' })

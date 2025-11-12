@@ -19,7 +19,9 @@
   border-radius: 8px;
   position: relative;
   max-height: 90vh;
+  /* Keep layout stable when content height changes by reserving scrollbar space */
   overflow-y: auto;
+  scrollbar-gutter: stable;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
   animation: modalFadeIn 0.3s ease-out;
 }

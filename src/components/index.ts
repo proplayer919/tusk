@@ -7,3 +7,4 @@ export { default as Toggle } from './Toggle';
 export { default as ProgressBar } from './ProgressBar';
 export { default as IconLabel } from './IconLabel';
 export { default as SidebarButton } from './SidebarButton';
+export { default as StaffPanel } from './StaffPanel';

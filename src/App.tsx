@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import {
-  Button, Card, ProgressBar, Modal, IconLabel, SidebarButton
+  Button, Card, ProgressBar, Modal, IconLabel, SidebarButton, StaffPanel
 } from './components'
 import LoginForm from './components/LoginForm'
 import RegisterForm from './components/RegisterForm'
@@ -27,9 +27,11 @@ function App() {
   const [username, setUsername] = useState<string | null>(null)
   const [isStaff, setIsStaff] = useState<boolean>(false)
 
-  // modals for sign in / register
+  // modals for sign in / register / staff
   const [signInOpen, setSignInOpen] = useState(false)
   const [registerOpen, setRegisterOpen] = useState(false)
+  const [staffOpen, setStaffOpen] = useState(false)
+
   // global small modals: settings and credits
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [creditsOpen, setCreditsOpen] = useState(false)
@@ -231,6 +233,11 @@ function App() {
               <SidebarButton icon={<IconStar size={25} />} onClick={() => setCreditsOpen(true)}>
                 Credits
               </SidebarButton>
+              {isStaff && (
+                <SidebarButton icon={<IconTools size={25} />} onClick={() => setStaffOpen(true)}>
+                  Staff Panel
+                </SidebarButton>
+              )}
               <SidebarButton icon={<IconLogout size={25} />} onClick={() => {
                 auth.setToken(null)
                 setIsLoggedIn(false)
@@ -277,6 +284,9 @@ function App() {
         <p style={{ marginBottom: '1rem' }}>You've reached Evolution {evolution + 1}!</p>
         <Button onClick={handleExitModal}>Okay!</Button>
       </Modal>
+
+      {/* Staff Panel (staff only) */}
+      <StaffPanel isOpen={staffOpen} onClose={() => setStaffOpen(false)} />
 
       {/* Sign In modal */}
       <Modal title="Sign In" isOpen={signInOpen} onClose={() => setSignInOpen(false)} size="small">
