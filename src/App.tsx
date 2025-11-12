@@ -166,8 +166,8 @@ function App() {
         if (tag === 'INPUT' || tag === 'TEXTAREA' || active.isContentEditable) return
       }
 
-      // Only enable this behaviour at evolution 15
-      if (evolution !== 15) return
+      // Only enable this behaviour at evolution 15 or higher
+      if (evolution < 15) return
 
       // Prevent the default page scroll on Space
       e.preventDefault()
