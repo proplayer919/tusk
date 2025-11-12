@@ -14,7 +14,7 @@ const SettingsPanel: React.FC<Props> = ({ settings, onChange }) => {
   const setOverride = (v: boolean) => onChange({ ...settings, festiveOverride: v })
 
   // local UI state for current section (sidebar)
-  const [section, setSection] = React.useState<'general'|'sounds'|'account'|'advanced'>('general')
+  const [section, setSection] = React.useState<'general' | 'sounds' | 'account' | 'advanced'>('general')
 
   return (
     <div className="settings-root">
