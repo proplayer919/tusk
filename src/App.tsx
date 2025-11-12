@@ -116,25 +116,14 @@ function App() {
         // If missing, fall back to fetching /api/progress. Also, if guest local progress
         // exists, upload it and then reload server progress.
         try {
-          const localKey = 'tusk_progress'
-          const localRaw = localStorage.getItem(localKey)
-
-          if (localRaw) {
-            // merge local guest progress with server progress and sync the better one
-            const merged = await progressService.mergeAndSyncLocalWithServer()
-            if (merged) {
-              if (typeof merged.count === 'number') setCount(merged.count)
-              if (typeof merged.evolution === 'number') setEvolution(merged.evolution)
-              if (merged.hasClickedOnce) setHasClickedOnce(true)
-            }
-          } else {
-            // no guest progress to merge — apply server-side progress from user if present
-            const serverProgress = user && user.progress ? user.progress : await progressService.loadProgress()
-            if (serverProgress) {
-              if (typeof serverProgress.count === 'number') setCount(serverProgress.count)
-              if (typeof serverProgress.evolution === 'number') setEvolution(serverProgress.evolution)
-              if (serverProgress.hasClickedOnce) setHasClickedOnce(true)
-            }
+          // Do NOT merge or upload guest (localStorage) progress automatically.
+          // Keep guest progress (localStorage) and account/cloud progress separate.
+          // Apply server-side progress from the returned user object or by fetching it.
+          const serverProgress = user && user.progress ? user.progress : await progressService.loadProgress()
+          if (serverProgress) {
+            if (typeof serverProgress.count === 'number') setCount(serverProgress.count)
+            if (typeof serverProgress.evolution === 'number') setEvolution(serverProgress.evolution)
+            if (serverProgress.hasClickedOnce) setHasClickedOnce(true)
           }
         } catch (err) {
           // ignore
