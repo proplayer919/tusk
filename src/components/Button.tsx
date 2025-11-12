@@ -39,6 +39,24 @@ const Button: React.FC<ButtonProps> = ({
       type="button"
       className={`btn btn-${variant} ${className}`}
       onClick={onClick}
+      onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
+        // Only handle Enter key to avoid interfering with other keys
+        if (e.key !== 'Enter') return
+
+        // If button is disabled, ignore
+        if (disabled) return
+
+        // Ignore repeated keydown events when the user holds Enter
+        if (e.repeat) {
+          // Prevent default to stop native repeated activation
+          e.preventDefault()
+          return
+        }
+
+        // Prevent native activation and call onClick once
+        e.preventDefault()
+        if (onClick) onClick()
+      }}
       disabled={disabled}
       data-text={text}
     >
