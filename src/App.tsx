@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import {
-  Button, ProgressBar, Modal, IconLabel, SidebarButton
+  Button, Card, ProgressBar, Modal, IconLabel, SidebarButton
 } from './components'
 import LoginForm from './components/LoginForm'
 import RegisterForm from './components/RegisterForm'
-import { IconAward, IconSettings, IconLogout, IconLogin, IconUserPlus, IconStar, IconUserCircle, IconTools } from '@tabler/icons-react';
+import { IconAward, IconSettings, IconLogout, IconLogin, IconUserPlus, IconStar, IconUserCircle, IconTools, IconBrandGithub, IconMail } from '@tabler/icons-react';
 import './App.css'
 import auth from './services/auth'
 import progressService from './services/progress'
@@ -303,12 +303,58 @@ function App() {
 
       {/* Credits modal */}
       <Modal title="Credits" isOpen={creditsOpen} onClose={() => setCreditsOpen(false)} size="small">
-        <div style={{ marginBottom: '1rem' }}>
-          <p><strong>Tusk</strong></p>
-          <p>proplayer919: Creator & Developer</p>
-          <p>Ferretosan: Logo, art, sfx, and music</p>
+        <div className="credits-intro" style={{ marginBottom: '1rem' }}>
+          <p>Thanks to everyone who helped bring this project to life.</p>
         </div>
-        <Button onClick={() => setCreditsOpen(false)}>Close</Button>
+
+        {/* Credits grid */}
+        <div className="credits-grid">
+          {[
+            {
+              name: 'proplayer919',
+              role: 'Creator & Developer',
+              avatar: <IconUserCircle size={40} />,
+              links: [
+                { href: 'https://github.com/proplayer919', icon: <IconBrandGithub size={16} /> },
+                { href: 'mailto:me@proplayer919.dev', icon: <IconMail size={16} /> }
+              ]
+            },
+            {
+              name: 'Ferretosan',
+              role: 'Music, Sound Effects, and Art',
+              avatar: <IconUserCircle size={40} />,
+              links: [
+                { href: 'https://github.com/Ferretosan', icon: <IconBrandGithub size={16} /> },
+                { href: 'mailto:ferret@disroot.org', icon: <IconMail size={16} /> }
+              ]
+            }
+          ].map(person => (
+            <Card key={person.name} className="credit-card">
+              <div className="credit-top">
+                <div className="credit-avatar" aria-hidden>
+                  {person.avatar}
+                </div>
+                <div className="credit-meta">
+                  <div className="credit-name">{person.name}</div>
+                  <div className="credit-role">{person.role}</div>
+                </div>
+              </div>
+              {person.links && person.links.length > 0 && (
+                <div className="credit-links">
+                  {person.links.map(l => (
+                    <a key={l.href} href={l.href} target="_blank" rel="noreferrer" className="credit-link">
+                      {l.icon}
+                    </a>
+                  ))}
+                </div>
+              )}
+            </Card>
+          ))}
+        </div>
+
+        <div style={{ marginTop: '1rem', textAlign: 'right' }}>
+          <Button onClick={() => setCreditsOpen(false)}>Close</Button>
+        </div>
       </Modal>
 
       {/* Register modal */}

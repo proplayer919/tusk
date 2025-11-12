@@ -102,3 +102,82 @@
 .modal-content {
   padding: 0 1.5rem 1.5rem 1.5rem;
 }
+
+/* Credits-specific styles */
+.credits-intro {
+  color: var(--text-muted);
+}
+
+.credits-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+
+.credit-card {
+  /* small padding override to make cards compact inside modal */
+  padding: 0.75rem;
+}
+
+.credit-top {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.credit-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.03), rgba(0, 0, 0, 0.02));
+  color: var(--text);
+  border: 1px solid var(--border-muted);
+  flex-shrink: 0;
+}
+
+.credit-meta {
+  min-width: 0;
+}
+
+.credit-name {
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.credit-role {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-top: 0.15rem;
+}
+
+.credit-links {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.credit-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--border-muted);
+  transition: all 0.12s ease-in-out;
+}
+
+.credit-link:hover {
+  color: var(--text);
+  border-color: var(--border);
+  transform: translateY(-2px);
+}
