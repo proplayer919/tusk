@@ -174,3 +174,82 @@
     padding: 0.5rem 0;
   }
 }
+
+/* Locked card styles */
+.locked-card .card-content {
+  padding: 0;
+}
+
+.locked-card-wrapper {
+  max-width: 720px;
+  margin: 2rem auto;
+  padding: 1.25rem 1.5rem;
+  text-align: center;
+}
+
+.locked-card-top {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+.locked-card-badge {
+  background: #fde8e8;
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.locked-card-badge svg {
+  color: #c53030;
+}
+
+.locked-card-title {
+  text-align: left;
+}
+
+.locked-card-title h2 {
+  margin: 0;
+}
+
+.locked-card-subtext {
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.locked-card-body {
+  margin-top: 0.75rem;
+  text-align: left;
+}
+
+.locked-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.locked-row+.locked-row {
+  margin-top: 0.25rem;
+}
+
+.locked-expires-row {
+  margin-top: 6px;
+}
+
+.locked-contact {
+  margin-top: 1rem;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.locked-row--mb-md {
+  margin-bottom: 0.5rem;
+}
+
+.locked-row--mb-sm {
+  margin-bottom: 0.25rem;
+}

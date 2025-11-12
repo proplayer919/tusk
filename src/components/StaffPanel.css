@@ -193,3 +193,12 @@
   color: var(--text);
   padding: 0.5rem
 }
+
+.locked-permanent {
+  padding: 0.4rem 0.6rem;
+  background: var(--bg-light);
+  border-radius: 6px;
+  color: var(--text);
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}

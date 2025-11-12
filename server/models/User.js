@@ -11,7 +11,12 @@ const UserSchema = new mongoose.Schema({
   passwordHash: { type: String, required: true },
   progress: { type: Object, default: {} },
   // staff flag: when true, indicates the account is a staff member
-  staff: { type: Boolean, default: false }
+  staff: { type: Boolean, default: false },
+  // account lock fields: lockUntil is epoch ms for expiry, -1 for permanent, or null for not locked
+  lockReason: { type: String, default: null },
+  lockUntil: { type: Number, default: null },
+  lockedAt: { type: Date, default: null }
 }, { timestamps: true })
+
 
 module.exports = mongoose.model('User', UserSchema)

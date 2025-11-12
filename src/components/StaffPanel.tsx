@@ -11,6 +11,9 @@ interface UserSummary {
   username: string
   staff: boolean
   progress: any
+  lockReason?: string | null
+  lockUntil?: number | null
+  lockedAt?: string | null
 }
 
 interface StaffPanelProps {
@@ -110,7 +113,10 @@ const StaffPanel: React.FC<StaffPanelProps> = ({ isOpen, onClose }) => {
         }
       })
 
-      const payload = { username: selected.username, progress, staff: selected.staff }
+      const payload: any = { username: selected.username, progress, staff: selected.staff }
+      // include lock fields if present on selected (allow null to clear)
+      if (Object.prototype.hasOwnProperty.call(selected, 'lockReason')) payload.lockReason = selected.lockReason || null
+      if (Object.prototype.hasOwnProperty.call(selected, 'lockUntil')) payload.lockUntil = typeof selected.lockUntil === 'number' ? selected.lockUntil : (selected.lockUntil === null ? null : undefined)
       const res = await staffService.updateUser(selected.id, payload)
       setSelected(res)
       // refresh list
@@ -203,6 +209,39 @@ const StaffPanel: React.FC<StaffPanelProps> = ({ isOpen, onClose }) => {
                     <label>Staff</label>
                     <div>
                       <Checkbox checked={!!selected.staff} onChange={(val) => setSelected({ ...selected, staff: val })} />
+                    </div>
+                  </div>
+
+                  <div className="staff-detail-row">
+                    <label>Account lock</label>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                        <Input value={selected.lockReason || ''} onChange={(e: any) => setSelected({ ...selected, lockReason: e.target.value || null })} placeholder="Lock reason (leave empty to clear)" />
+                      </div>
+
+                      <label style={{ minWidth: '8rem' }}>Expiry</label>
+                      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                        {selected.lockUntil === -1 ? (
+                          <div className="locked-permanent">Permanent</div>
+                        ) : (
+                          <input type="datetime-local" style={{ marginBottom: '0.5rem' }} className="input input-primary" value={selected.lockUntil && selected.lockUntil !== -1 ? new Date(selected.lockUntil).toISOString().slice(0, 16) : ''} onChange={(e: any) => {
+                            const v = e.target.value
+                            if (!v) {
+                              setSelected({ ...selected, lockUntil: null })
+                            } else {
+                              const ms = new Date(v).getTime()
+                              setSelected({ ...selected, lockUntil: Number.isNaN(ms) ? null : ms })
+                            }
+                          }} />
+                        )}
+                      </div>
+
+                      <Button onClick={() => setSelected({ ...selected, lockUntil: -1 })}>Permanent</Button>
+                      <Button onClick={() => setSelected({ ...selected, lockReason: null, lockUntil: null })}>Unlock</Button>
+
+                      {selected.lockedAt && (
+                        <div style={{ fontSize: '0.9rem', color: '#666' }}>Locked at: {new Date(selected.lockedAt).toLocaleString()}</div>
+                      )}
                     </div>
                   </div>
                 </div>

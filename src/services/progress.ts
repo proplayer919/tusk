@@ -25,11 +25,21 @@ export async function saveProgress(progress: any) {
     return
   }
 
-  await fetch(API_BASE + '/api/progress', {
+  const res = await fetch(API_BASE + '/api/progress', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
     body: JSON.stringify({ progress })
   })
+
+  // If server responds with non-OK, throw an error containing status and body
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}))
+    const err = new Error(body.message || 'Failed to save progress')
+      // attach status for upstream handling
+      ; (err as any).status = res.status
+      ; (err as any).body = body
+    throw err
+  }
 }
 
 export default { loadProgress, saveProgress }

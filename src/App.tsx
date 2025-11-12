@@ -4,7 +4,7 @@ import {
 } from './components'
 import LoginForm from './components/LoginForm'
 import RegisterForm from './components/RegisterForm'
-import { IconAward, IconSettings, IconLogout, IconLogin, IconUserPlus, IconStar, IconUserCircle, IconTools, IconBrandGithub, IconMail } from '@tabler/icons-react';
+import { IconAward, IconSettings, IconLogout, IconLogin, IconUserPlus, IconStar, IconUserCircle, IconTools, IconBrandGithub, IconMail, IconLock, IconClock, IconCalendar, IconAlertCircle } from '@tabler/icons-react';
 import './App.css'
 import auth from './services/auth'
 import settingsService from './services/settings'
@@ -27,6 +27,8 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => !!auth.getToken())
   const [username, setUsername] = useState<string | null>(null)
   const [isStaff, setIsStaff] = useState<boolean>(false)
+  const [accountLock, setAccountLock] = useState<{ lockReason?: string | null; lockUntil?: number | null; lockedAt?: string | null } | null>(null)
+  const [lockCountdown, setLockCountdown] = useState<number | null>(null)
 
   // modals for sign in / register / staff
   const [signInOpen, setSignInOpen] = useState(false)
@@ -64,6 +66,7 @@ function App() {
           setIsLoggedIn(true)
           setUsername(user.username)
           setIsStaff(Boolean(user.staff))
+          setAccountLock({ lockReason: user.lockReason || null, lockUntil: typeof user.lockUntil === 'number' ? user.lockUntil : (user.lockUntil === null ? null : null), lockedAt: user.lockedAt || null })
           const saved = await progressService.loadProgress()
           if (saved) {
             if (typeof saved.count === 'number') setCount(saved.count)
@@ -77,6 +80,8 @@ function App() {
           auth.setToken(null)
           setIsLoggedIn(false)
           setIsStaff(false)
+          setAccountLock(null)
+          setLockCountdown(null)
           // try to load guest progress instead
           try {
             const saved = await progressService.loadProgress()
@@ -114,6 +119,7 @@ function App() {
         if (!mounted) return
         setUsername(user.username)
         setIsStaff(Boolean(user.staff))
+        setAccountLock({ lockReason: user.lockReason || null, lockUntil: typeof user.lockUntil === 'number' ? user.lockUntil : (user.lockUntil === null ? null : null), lockedAt: user.lockedAt || null })
 
         // Determine server progress: prefer explicit user.progress returned from /api/user
         // If missing, fall back to fetching /api/progress. Also, if guest local progress
@@ -142,12 +148,78 @@ function App() {
     return () => { mounted = false }
   }, [isLoggedIn])
 
+  // manage countdown for lock expiry if account is locked
+  useEffect(() => {
+    let t: number | null = null
+    function update() {
+      if (!accountLock || accountLock.lockUntil === null) {
+        setLockCountdown(null)
+        return
+      }
+      if (accountLock.lockUntil === -1) {
+        setLockCountdown(-1)
+        return
+      }
+      const remaining = Math.max(0, Math.floor(((accountLock.lockUntil as number) - Date.now()) / 1000))
+      setLockCountdown(remaining)
+    }
+    update()
+    t = window.setInterval(update, 1000)
+    return () => { if (t) window.clearInterval(t) }
+  }, [accountLock])
+
+  // Poll /api/user every 5s while logged in to pick up lock state changes
+  useEffect(() => {
+    if (!isLoggedIn) return
+    let mounted = true
+    let t: number | null = null
+
+    async function poll() {
+      try {
+        const user = await auth.getCurrentUser()
+        if (!mounted) return
+        setAccountLock({ lockReason: user.lockReason || null, lockUntil: typeof user.lockUntil === 'number' ? user.lockUntil : (user.lockUntil === null ? null : null), lockedAt: user.lockedAt || null })
+      } catch (err) {
+        // If fetching user fails (e.g., token invalid), clear login state
+        try {
+          auth.setToken(null)
+        } catch (e) { }
+        if (!mounted) return
+        setIsLoggedIn(false)
+        setIsStaff(false)
+        setAccountLock(null)
+        setLockCountdown(null)
+      }
+    }
+
+    // poll immediately then every 5 seconds
+    poll()
+    t = window.setInterval(poll, 5000)
+    return () => { mounted = false; if (t) window.clearInterval(t) }
+  }, [isLoggedIn])
+
   // persist progress when important pieces change (only after we've hydrated initial state)
   useEffect(() => {
     if (!hydrated) return
     // if logged in, wait until we've loaded/applied server progress before saving
     if (isLoggedIn && !serverLoaded) return
-    progressService.saveProgress({ count, evolution, hasClickedOnce })
+    let mounted = true
+      ; (async () => {
+        try {
+          await progressService.saveProgress({ count, evolution, hasClickedOnce })
+        } catch (err: any) {
+          // If server rejected because the account is locked, refresh the user and update lock state
+          if (err && err.status === 403) {
+            try {
+              const user = await auth.getCurrentUser()
+              if (!mounted) return
+              setAccountLock({ lockReason: user.lockReason || null, lockUntil: typeof user.lockUntil === 'number' ? user.lockUntil : (user.lockUntil === null ? null : null), lockedAt: user.lockedAt || null })
+            } catch (e) {
+              // ignore failures to fetch user
+            }
+          }
+        }
+      })()
   }, [count, evolution, hasClickedOnce, hydrated, isLoggedIn, serverLoaded])
 
   // allow pressing Space to click when the player reaches evolution 15
@@ -243,6 +315,8 @@ function App() {
                 setServerLoaded(false)
                 setUsername(null)
                 setIsStaff(false)
+                setAccountLock(null)
+                setLockCountdown(null)
               }} danger>
                 Logout
               </SidebarButton>
@@ -274,9 +348,58 @@ function App() {
       </aside>
 
       <main className="game-main">
-        <Button onClick={handleClick} disabled={buttonDisabled}>{count ? `You have clicked ${count} times` : 'Click Me!'}</Button>
+        {/* If the account is locked, replace main content with lock info */}
+        {(accountLock && (accountLock.lockUntil === -1 || (typeof accountLock.lockUntil === 'number' && accountLock.lockUntil > Date.now()))) ? (
+          <Card className="locked-card"><div className="locked-card-wrapper">
+            <div className="locked-card-top">
+              <div className="locked-card-badge">
+                <IconLock size={40} />
+              </div>
+              <div className="locked-card-title">
+                <h2>Account locked</h2>
+                <div className="locked-card-subtext">Access to the clicker area is currently restricted.</div>
+              </div>
+            </div>
 
-        <ProgressBar value={count / getMaxCount()} showValue maxValue={getMaxCount()} animated />
+            <div className="locked-card-body">
+              {accountLock.lockReason && (
+                <div className="locked-row locked-row--mb-md">
+                  <IconAlertCircle size={18} />
+                  <div><strong>Reason:</strong> {accountLock.lockReason}</div>
+                </div>
+              )}
+
+              {accountLock.lockedAt && (
+                <div className="locked-row locked-row--mb-sm">
+                  <IconCalendar size={16} />
+                  <div><strong>Locked at:</strong> {new Date(accountLock.lockedAt).toLocaleString()}</div>
+                </div>
+              )}
+
+              <div className="locked-row locked-expires-row">
+                <IconClock size={16} />
+                <div>
+                  <strong>Expires:</strong>{' '}
+                  {accountLock.lockUntil === -1 ? (
+                    <span>Permanent</span>
+                  ) : (
+                    <span>{lockCountdown !== null ? (lockCountdown > 0 ? `${Math.floor(lockCountdown / 3600)}h ${Math.floor((lockCountdown % 3600) / 60)}m ${lockCountdown % 60}s` : 'Expired') : 'Loading...'}</span>
+                  )}
+                </div>
+              </div>
+
+              <div className="locked-contact">
+                If you believe this is a mistake, please contact staff for assistance.
+              </div>
+            </div>
+          </div></Card>
+        ) : (
+          <>
+            <Button onClick={handleClick} disabled={buttonDisabled}>{count ? `You have clicked ${count} times` : 'Click Me!'}</Button>
+
+            <ProgressBar value={count / getMaxCount()} showValue maxValue={getMaxCount()} animated />
+          </>
+        )}
       </main>
 
       <Modal title="Congratulations!" isOpen={modalOpen} onClose={handleExitModal}>

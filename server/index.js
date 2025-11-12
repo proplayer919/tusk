@@ -189,7 +189,7 @@ app.post('/api/register', async (req, res) => {
 
     // Use uuid as the primary identifier in the token and client-facing id
     const token = jwt.sign({ id: user.uuid }, JWT_SECRET, { expiresIn: '30d' })
-    res.json({ token, user: { id: user.uuid, username: user.username, progress: user.progress, staff: !!user.staff } })
+    res.json({ token, user: { id: user.uuid, username: user.username, progress: user.progress, staff: !!user.staff, lockReason: user.lockReason || null, lockUntil: user.lockUntil || null, lockedAt: user.lockedAt || null } })
   } catch (err) {
     console.error(err)
     res.status(500).json({ message: 'server error' })
@@ -215,7 +215,7 @@ app.post('/api/login', async (req, res) => {
     }
 
     const token = jwt.sign({ id: user.uuid }, JWT_SECRET, { expiresIn: '30d' })
-    res.json({ token, user: { id: user.uuid, username: user.username, progress: user.progress, staff: !!user.staff } })
+    res.json({ token, user: { id: user.uuid, username: user.username, progress: user.progress, staff: !!user.staff, lockReason: user.lockReason || null, lockUntil: user.lockUntil || null, lockedAt: user.lockedAt || null } })
   } catch (err) {
     console.error(err)
     res.status(500).json({ message: 'server error' })
@@ -228,7 +228,7 @@ app.get('/api/user', authMiddleware, async (req, res) => {
     // authMiddleware attached req.userId (mongo _id) and req.userUuid
     const user = await User.findById(req.userId)
     if (!user) return res.status(404).json({ message: 'not found' })
-    res.json({ id: user.uuid, username: user.username, progress: user.progress, staff: !!user.staff })
+    res.json({ id: user.uuid, username: user.username, progress: user.progress, staff: !!user.staff, lockReason: user.lockReason || null, lockUntil: user.lockUntil || null, lockedAt: user.lockedAt || null })
   } catch (err) {
     console.error(err)
     res.status(500).json({ message: 'server error' })
@@ -250,6 +250,13 @@ app.get('/api/progress', authMiddleware, async (req, res) => {
 // Save progress
 app.post('/api/progress', authMiddleware, async (req, res) => {
   try {
+    // Check the user's lock status before accepting progress updates
+    const user = await User.findById(req.userId)
+    if (!user) return res.status(404).json({ message: 'not found' })
+
+    const isLocked = (user.lockUntil !== null) && (user.lockUntil === -1 || (typeof user.lockUntil === 'number' && user.lockUntil > Date.now()))
+    if (isLocked) return res.status(403).json({ message: 'account locked' })
+
     const { progress } = req.body
     await User.findByIdAndUpdate(req.userId, { progress }, { new: true })
     res.json({ ok: true })
@@ -293,7 +300,7 @@ app.get('/api/staff/user/:id', authMiddleware, staffOnly, async (req, res) => {
     const id = req.params.id
     const user = await User.findOne({ uuid: id }).lean()
     if (!user) return res.status(404).json({ message: 'not found' })
-    const safe = { id: user.uuid, username: user.username, progress: user.progress || {}, staff: !!user.staff, createdAt: user.createdAt, updatedAt: user.updatedAt }
+    const safe = { id: user.uuid, username: user.username, progress: user.progress || {}, staff: !!user.staff, createdAt: user.createdAt, updatedAt: user.updatedAt, lockReason: user.lockReason || null, lockUntil: user.lockUntil || null, lockedAt: user.lockedAt || null }
     res.json(safe)
   } catch (err) {
     console.error(err)
@@ -311,6 +318,22 @@ app.put('/api/staff/user/:id', authMiddleware, staffOnly, async (req, res) => {
     if (typeof progress !== 'undefined') update.progress = progress
     if (typeof staff !== 'undefined') update.staff = !!staff
 
+    // Support lock fields: lockReason (string|null), lockUntil (number|null|-1)
+    if (Object.prototype.hasOwnProperty.call(req.body, 'lockReason')) {
+      update.lockReason = req.body.lockReason === null ? null : String(req.body.lockReason)
+    }
+    if (Object.prototype.hasOwnProperty.call(req.body, 'lockUntil')) {
+      // Accept null, -1 (permanent), or a number (epoch ms)
+      const val = req.body.lockUntil
+      if (val === null) update.lockUntil = null
+      else if (typeof val === 'number') update.lockUntil = val
+      else if (typeof val === 'string' && val.trim() !== '') {
+        const parsed = Number(val)
+        if (!Number.isNaN(parsed)) update.lockUntil = parsed
+      }
+      // If being unlocked (lockUntil === null), clear lockedAt and lockReason handled above
+    }
+
     // If updating username, validate pattern
     if (update.username) {
       const usernamePattern = /^[A-Za-z0-9_-]{3,20}$/
@@ -319,9 +342,33 @@ app.put('/api/staff/user/:id', authMiddleware, staffOnly, async (req, res) => {
       if (existing && existing.uuid !== id) return res.status(409).json({ message: 'username already exists' })
     }
 
-    const user = await User.findOneAndUpdate({ uuid: id }, update, { new: true }).lean()
+    // If setting a lock (lockUntil present and not null) and lockedAt not already set, set lockedAt to now
+    let user = await User.findOne({ uuid: id })
     if (!user) return res.status(404).json({ message: 'not found' })
-    const safe = { id: user.uuid, username: user.username, progress: user.progress || {}, staff: !!user.staff, createdAt: user.createdAt, updatedAt: user.updatedAt }
+
+    // Apply updates carefully so we can set lockedAt when a lock is applied
+    if (Object.prototype.hasOwnProperty.call(update, 'lockUntil')) {
+      const newLockUntil = update.lockUntil
+      if (newLockUntil !== null && (!user.lockUntil || user.lockUntil === null)) {
+        // newly locking: set lockedAt
+        user.lockedAt = new Date()
+      }
+      if (newLockUntil === null) {
+        user.lockedAt = null
+        user.lockReason = null
+      }
+      user.lockUntil = newLockUntil
+    }
+    if (Object.prototype.hasOwnProperty.call(update, 'lockReason')) {
+      user.lockReason = update.lockReason
+    }
+    if (Object.prototype.hasOwnProperty.call(update, 'username')) user.username = update.username
+    if (Object.prototype.hasOwnProperty.call(update, 'progress')) user.progress = update.progress
+    if (Object.prototype.hasOwnProperty.call(update, 'staff')) user.staff = update.staff
+
+    user = await user.save()
+    if (!user) return res.status(404).json({ message: 'not found' })
+    const safe = { id: user.uuid, username: user.username, progress: user.progress || {}, staff: !!user.staff, createdAt: user.createdAt, updatedAt: user.updatedAt, lockReason: user.lockReason || null, lockUntil: user.lockUntil || null, lockedAt: user.lockedAt || null }
     res.json(safe)
   } catch (err) {
     console.error(err)
