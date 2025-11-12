@@ -4,6 +4,7 @@ const mongoose = require('mongoose')
 const cors = require('cors')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+const crypto = require('crypto')
 const User = require('./models/User')
 
 const app = express()
@@ -63,9 +64,37 @@ async function ensureParkedNamesCollection() {
 // Run once after connection established
 mongoose.connection.once('open', () => {
   ensureParkedNamesCollection()
+    // Ensure every existing user has a uuid. If missing, generate one and save.
+    ; (async () => {
+      try {
+        const users = await User.find({ $or: [{ uuid: { $exists: false } }, { uuid: null }] })
+        if (!users || users.length === 0) return
+        console.log(`Assigning uuids to ${users.length} users without uuid`)
+        for (const u of users) {
+          // generate and assign, retry if collision
+          let assigned = false
+          for (let i = 0; i < 5 && !assigned; i++) {
+            const candidate = crypto.randomUUID()
+            try {
+              u.uuid = candidate
+              await u.save()
+              assigned = true
+            } catch (err) {
+              // If duplicate key error, try again
+              if (err && err.code === 11000) continue
+              console.error('Error assigning uuid to user', u._id, err)
+              break
+            }
+          }
+          if (!assigned) console.error('Failed to assign uuid to user', u._id)
+        }
+      } catch (err) {
+        console.error('Failed to assign uuids to existing users', err)
+      }
+    })()
 })
 
-function authMiddleware(req, res, next) {
+async function authMiddleware(req, res, next) {
   const auth = req.headers.authorization
   if (!auth) return res.status(401).json({ message: 'Missing auth' })
   const parts = auth.split(' ')
@@ -73,7 +102,40 @@ function authMiddleware(req, res, next) {
   const token = parts[1]
   try {
     const payload = jwt.verify(token, JWT_SECRET)
-    req.userId = payload.id
+    // New tokens put the user's uuid in payload.id
+    const id = payload.id
+    if (!id) return res.status(401).json({ message: 'Invalid token payload' })
+
+    // Try to find user by uuid first
+    let user = await User.findOne({ uuid: id })
+    if (!user) {
+      // Fallback: token may contain legacy Mongo _id. Try that.
+      // Accept both 24-hex ObjectId strings and ObjectId objects.
+      const isObjectId = typeof id === 'string' && /^[0-9a-fA-F]{24}$/.test(id)
+      if (isObjectId) {
+        user = await User.findById(id)
+        // If found but missing uuid, assign one now
+        if (user && (!user.uuid || user.uuid === null)) {
+          user.uuid = crypto.randomUUID()
+          try {
+            await user.save()
+          } catch (err) {
+            if (err && err.code === 11000) {
+              // collision extremely unlikely; ignore and continue without saving
+              console.error('UUID collision when assigning to existing user', user._id)
+            } else {
+              console.error('Error saving uuid for user', user._id, err)
+            }
+          }
+        }
+      }
+    }
+
+    if (!user) return res.status(401).json({ message: 'Invalid token (user not found)' })
+
+    // Attach both identifiers for downstream handlers
+    req.userId = user._id
+    req.userUuid = user.uuid
     next()
   } catch (err) {
     return res.status(401).json({ message: 'Invalid token' })
@@ -117,8 +179,9 @@ app.post('/api/register', async (req, res) => {
     const user = new User({ username, passwordHash: hash, progress: {} })
     await user.save()
 
-    const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '30d' })
-    res.json({ token, user: { id: user._id, username: user.username, progress: user.progress, staff: !!user.staff } })
+    // Use uuid as the primary identifier in the token and client-facing id
+    const token = jwt.sign({ id: user.uuid }, JWT_SECRET, { expiresIn: '30d' })
+    res.json({ token, user: { id: user.uuid, username: user.username, progress: user.progress, staff: !!user.staff } })
   } catch (err) {
     console.error(err)
     res.status(500).json({ message: 'server error' })
@@ -137,8 +200,14 @@ app.post('/api/login', async (req, res) => {
     const ok = await bcrypt.compare(password, user.passwordHash)
     if (!ok) return res.status(401).json({ message: 'invalid credentials' })
 
-    const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '30d' })
-    res.json({ token, user: { id: user._id, username: user.username, progress: user.progress, staff: !!user.staff } })
+    // Ensure user has uuid (in case of very old accounts)
+    if (!user.uuid) {
+      user.uuid = crypto.randomUUID()
+      try { await user.save() } catch (e) { /* ignore save errors like collisions */ }
+    }
+
+    const token = jwt.sign({ id: user.uuid }, JWT_SECRET, { expiresIn: '30d' })
+    res.json({ token, user: { id: user.uuid, username: user.username, progress: user.progress, staff: !!user.staff } })
   } catch (err) {
     console.error(err)
     res.status(500).json({ message: 'server error' })
@@ -148,9 +217,10 @@ app.post('/api/login', async (req, res) => {
 // Get current user
 app.get('/api/user', authMiddleware, async (req, res) => {
   try {
+    // authMiddleware attached req.userId (mongo _id) and req.userUuid
     const user = await User.findById(req.userId)
     if (!user) return res.status(404).json({ message: 'not found' })
-    res.json({ id: user._id, username: user.username, progress: user.progress, staff: !!user.staff })
+    res.json({ id: user.uuid, username: user.username, progress: user.progress, staff: !!user.staff })
   } catch (err) {
     console.error(err)
     res.status(500).json({ message: 'server error' })
