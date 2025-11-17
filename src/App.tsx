@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import {
-  Button, Card, ProgressBar, Modal, IconLabel, SidebarButton, StaffPanel, SettingsPanel
+  Button, Card, ProgressBar, Modal, IconLabel, SidebarButton, StaffPanel, SettingsPanel, useToast
 } from './components'
 import LoginForm from './components/LoginForm'
 import RegisterForm from './components/RegisterForm'
@@ -15,7 +15,7 @@ function App() {
   const [count, setCount] = useState(0)
   const [evolution, setEvolution] = useState(1)
   const [buttonDisabled, setButtonDisabled] = useState(false)
-  const [modalOpen, setModalOpen] = useState(false)
+  const { show, isShowing } = useToast()
   const [hasClickedOnce, setHasClickedOnce] = useState(false)
 
   // hydration flag: don't auto-save until we've loaded initial progress
@@ -50,8 +50,16 @@ function App() {
     setHasClickedOnce(true)
 
     if (count + 1 >= getMaxCount()) {
-      setButtonDisabled(true)
-      setModalOpen(true)
+      // Advance immediately so the player can continue clicking.
+      setEvolution(prev => prev + 1)
+      setCount(0)
+      setButtonDisabled(false)
+      // Show a non-blocking toast to notify the player.
+      show({
+        message: `You've reached Evolution ${evolution + 1}!`,
+        duration: 3500,
+        action: { label: 'Okay!', onClick: () => { /* noop */ } }
+      })
     }
   }
 
@@ -244,16 +252,23 @@ function App() {
       // Prevent the default page scroll on Space
       e.preventDefault()
 
-      // If the main click button is disabled (or modal open), don't click
-      if (buttonDisabled || modalOpen) return
+  // If the main click button is disabled, don't click
+  if (buttonDisabled) return
 
       // Perform a click-like increment using the functional state updater
       setCount(prev => {
         const next = prev + 1
         setHasClickedOnce(true)
         if (next >= (evolution * 10) + 40) {
-          setButtonDisabled(true)
-          setModalOpen(true)
+          // Advance immediately and allow clicking to continue; show toast for feedback
+          setEvolution(prev => prev + 1)
+          setCount(0)
+          setButtonDisabled(false)
+          show({
+            message: `You've reached Evolution ${evolution + 1}!`,
+            duration: 3500,
+            action: { label: 'Okay!', onClick: () => { /* noop */ } }
+          })
         }
         return next
       })
@@ -261,15 +276,10 @@ function App() {
 
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [evolution, buttonDisabled, modalOpen])
+  }, [evolution, buttonDisabled, isShowing])
 
 
-  function handleExitModal() {
-    setModalOpen(false)
-    setEvolution(evolution + 1)
-    setCount(0)
-    setButtonDisabled(false)
-  }
+  // local finalization handled via onClose passed to show()
 
   return (
     <div className="app">
@@ -402,10 +412,7 @@ function App() {
         )}
       </main>
 
-      <Modal title="Congratulations!" isOpen={modalOpen} onClose={handleExitModal}>
-        <p style={{ marginBottom: '1rem' }}>You've reached Evolution {evolution + 1}!</p>
-        <Button onClick={handleExitModal}>Okay!</Button>
-      </Modal>
+      
 
       {/* Staff Panel (staff only) */}
       <StaffPanel isOpen={staffOpen} onClose={() => setStaffOpen(false)} />
