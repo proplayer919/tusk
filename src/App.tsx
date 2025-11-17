@@ -252,8 +252,8 @@ function App() {
       // Prevent the default page scroll on Space
       e.preventDefault()
 
-  // If the main click button is disabled, don't click
-  if (buttonDisabled) return
+      // If the main click button is disabled, don't click
+      if (buttonDisabled) return
 
       // Perform a click-like increment using the functional state updater
       setCount(prev => {
@@ -412,7 +412,7 @@ function App() {
         )}
       </main>
 
-      
+
 
       {/* Staff Panel (staff only) */}
       <StaffPanel isOpen={staffOpen} onClose={() => setStaffOpen(false)} />
