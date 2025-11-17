@@ -1,4 +1,5 @@
 import React from 'react';
+import { useSound } from '../providers/SoundProvider'
 import './Button.css';
 
 interface ButtonProps {
@@ -33,12 +34,16 @@ const Button: React.FC<ButtonProps> = ({
   }
 
   const text = getTextContent(children) || 'Button'
+  const sound = useSound()
 
   return (
     <button
       type="button"
       className={`btn btn-${variant} ${className}`}
-      onClick={onClick}
+      onClick={() => {
+        try { sound.play('click') } catch (e) { }
+        if (onClick) onClick()
+      }}
       onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
         // Only handle Enter key to avoid interfering with other keys
         if (e.key !== 'Enter') return
@@ -55,6 +60,7 @@ const Button: React.FC<ButtonProps> = ({
 
         // Prevent native activation and call onClick once
         e.preventDefault()
+        try { sound.play('click') } catch (e) { }
         if (onClick) onClick()
       }}
       disabled={disabled}

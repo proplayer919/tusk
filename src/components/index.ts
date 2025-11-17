@@ -11,3 +11,4 @@ export { default as StaffPanel } from './StaffPanel';
 export { default as SettingsPanel } from './SettingsPanel';
 export { default as Toast } from './Toast';
 export { default as ToastProvider, useToast } from '../providers/ToastProvider';
+export { default as Slider } from './Slider';

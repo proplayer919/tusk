@@ -1,6 +1,7 @@
 import React from 'react'
 import './SettingsPanel.css'
 import Checkbox from './Checkbox'
+import Slider from './Slider'
 import type { Settings } from '../services/settings'
 import { IconSettings, IconMusic, IconUserCircle, IconTools } from '@tabler/icons-react'
 
@@ -12,6 +13,9 @@ interface Props {
 const SettingsPanel: React.FC<Props> = ({ settings, onChange }) => {
   const setFestive = (v: boolean) => onChange({ ...settings, festiveEnabled: v })
   const setOverride = (v: boolean) => onChange({ ...settings, festiveOverride: v })
+  const setMusicVolume = (v: number) => onChange({ ...settings, musicVolume: v })
+  const setSfxVolume = (v: number) => onChange({ ...settings, sfxVolume: v })
+  const setShowNowPlayingToasts = (v: boolean) => onChange({ ...settings, showNowPlayingToasts: v })
 
   // local UI state for current section (sidebar)
   const [section, setSection] = React.useState<'general' | 'sounds' | 'account' | 'advanced'>('general')
@@ -71,7 +75,19 @@ const SettingsPanel: React.FC<Props> = ({ settings, onChange }) => {
         {section === 'sounds' && (
           <div>
             <h3>Sounds</h3>
-            <p>No sound settings yet.</p>
+            <p>Adjust music and sound effect volumes.</p>
+
+            <div style={{ marginTop: '1rem' }}>
+              <Slider label={`Music volume`} value={settings.musicVolume ?? 0.6} onChange={setMusicVolume} min={0} max={1} step={0.01} />
+            </div>
+
+            <div style={{ marginTop: '1rem' }}>
+              <Slider label={`Sound effects volume`} value={settings.sfxVolume ?? 0.8} onChange={setSfxVolume} min={0} max={1} step={0.01} />
+            </div>
+
+            <div style={{ marginTop: '1rem' }}>
+              <Checkbox checked={settings.showNowPlayingToasts ?? true} onChange={setShowNowPlayingToasts} label="Show 'Now playing' toasts when songs start" />
+            </div>
           </div>
         )}
 

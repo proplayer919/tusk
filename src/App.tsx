@@ -8,6 +8,7 @@ import { IconAward, IconSettings, IconLogout, IconLogin, IconUserPlus, IconStar,
 import './App.css'
 import auth from './services/auth'
 import settingsService from './services/settings'
+import { useSound } from './providers/SoundProvider'
 import progressService from './services/progress'
 import FullscreenLoader from './components/FullscreenLoader'
 
@@ -40,6 +41,7 @@ function App() {
   const [creditsOpen, setCreditsOpen] = useState(false)
   // application settings (persisted to localStorage)
   const [settings, setSettings] = useState(() => settingsService.loadSettings())
+  const sound = useSound()
 
   function getMaxCount() {
     return (evolution * 10) + 40
@@ -52,6 +54,7 @@ function App() {
     if (count + 1 >= getMaxCount()) {
       // Advance immediately so the player can continue clicking.
       setEvolution(prev => prev + 1)
+      try { sound.play('evolve') } catch (e) { }
       setCount(0)
       setButtonDisabled(false)
       // Show a non-blocking toast to notify the player.
@@ -262,6 +265,7 @@ function App() {
         if (next >= (evolution * 10) + 40) {
           // Advance immediately and allow clicking to continue; show toast for feedback
           setEvolution(prev => prev + 1)
+          try { sound.play('evolve') } catch (e) { }
           setCount(0)
           setButtonDisabled(false)
           show({
