@@ -247,6 +247,30 @@ app.get('/api/progress', authMiddleware, async (req, res) => {
   }
 })
 
+// Achievements stats: return total users and counts of users who have each achievement id
+// Query: ?ids=id1,id2,...
+app.get('/api/achievements/stats', async (req, res) => {
+  try {
+    const ids = (req.query.ids || '').toString().split(',').map(s => s.trim()).filter(Boolean)
+    // count total users
+    const total = await User.countDocuments({})
+    const counts = {}
+    if (ids.length === 0) return res.json({ total, counts })
+
+    // For each id, count users with progress.achievements.id present
+    for (const id of ids) {
+      const q = {}
+      q[`progress.achievements.${id}`] = { $exists: true }
+      counts[id] = await User.countDocuments(q)
+    }
+
+    res.json({ total, counts })
+  } catch (err) {
+    console.error('achievements stats error', err)
+    res.status(500).json({ message: 'server error' })
+  }
+})
+
 // Save progress
 app.post('/api/progress', authMiddleware, async (req, res) => {
   try {

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useCallback, useEffect, useState } from 'react'
 import settingsService from '../services/settings'
 
-type SoundName = 'click' | 'evolve'
+type SoundName = 'click' | 'evolve' | 'achievement'
 
 type SoundContextValue = {
   play: (name: SoundName) => void
@@ -14,6 +14,7 @@ const SoundContext = createContext<SoundContextValue>({ play: () => { }, setVolu
 const SOUND_MAP: Record<SoundName, string> = {
   click: '/sfx/click.mp3',
   evolve: '/sfx/evolve.mp3',
+  achievement: '/sfx/evolve.mp3'
 }
 
 export function SoundProvider({ children }: { children: React.ReactNode }) {

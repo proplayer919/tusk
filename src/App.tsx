@@ -10,6 +10,8 @@ import auth from './services/auth'
 import settingsService from './services/settings'
 import { useSound } from './providers/SoundProvider'
 import progressService from './services/progress'
+import achievementsService from './services/achievements'
+import Achievements from './components/Achievements'
 import FullscreenLoader from './components/FullscreenLoader'
 
 function App() {
@@ -18,6 +20,7 @@ function App() {
   const [buttonDisabled, setButtonDisabled] = useState(false)
   const { show, isShowing } = useToast()
   const [hasClickedOnce, setHasClickedOnce] = useState(false)
+  const [totalClicks, setTotalClicks] = useState<number>(0)
 
   // active main content tab
   const [activeTab, setActiveTab] = useState<'clicker' | 'statistics' | 'achievements'>('clicker')
@@ -51,10 +54,12 @@ function App() {
   }
 
   function handleClick() {
-    setCount(count + 1)
+    const nextCount = count + 1
+    setCount(nextCount)
     setHasClickedOnce(true)
+    setTotalClicks(prev => prev + 1)
 
-    if (count + 1 >= getMaxCount()) {
+    if (nextCount >= getMaxCount()) {
       // Advance immediately so the player can continue clicking.
       setEvolution(prev => prev + 1)
       try { sound.play('evolve') } catch (e) { }
@@ -67,6 +72,14 @@ function App() {
         action: { label: 'Okay!', onClick: () => { /* noop */ } }
       })
     }
+
+    // Fire achievement checks (best-effort). Provide a UI callback to play sound and show toast.
+    try {
+      achievementsService.checkAndUnlock({ count: nextCount, evolution, hasClickedOnce: true, totalClicks: totalClicks + 1 }, (_id: string, name: string) => {
+        try { sound.play('achievement') } catch (e) { }
+        show({ message: `Achievement unlocked: ${name}`, duration: 3500 })
+      })
+    } catch (e) { }
   }
 
   // load auth user and saved progress on mount
@@ -86,6 +99,7 @@ function App() {
             if (typeof saved.count === 'number') setCount(saved.count)
             if (typeof saved.evolution === 'number') setEvolution(saved.evolution)
             if (saved.hasClickedOnce) setHasClickedOnce(true)
+            if (typeof saved.totalClicks === 'number') setTotalClicks(saved.totalClicks)
           }
           // we've loaded server-side progress (even if empty) so allow server saves
           setServerLoaded(true)
@@ -103,6 +117,7 @@ function App() {
               if (typeof saved.count === 'number') setCount(saved.count)
               if (typeof saved.evolution === 'number') setEvolution(saved.evolution)
               if (saved.hasClickedOnce) setHasClickedOnce(true)
+              if (typeof saved.totalClicks === 'number') setTotalClicks(saved.totalClicks)
             }
           } catch (e) {
             // ignore
@@ -114,6 +129,7 @@ function App() {
           if (typeof saved.count === 'number') setCount(saved.count)
           if (typeof saved.evolution === 'number') setEvolution(saved.evolution)
           if (saved.hasClickedOnce) setHasClickedOnce(true)
+          if (typeof saved.totalClicks === 'number') setTotalClicks(saved.totalClicks)
         }
       }
       // initial load complete
@@ -220,7 +236,7 @@ function App() {
     let mounted = true
       ; (async () => {
         try {
-          await progressService.saveProgress({ count, evolution, hasClickedOnce })
+          await progressService.saveProgress({ count, evolution, hasClickedOnce, totalClicks })
         } catch (err: any) {
           // If server rejected because the account is locked, refresh the user and update lock state
           if (err && err.status === 403) {
@@ -265,6 +281,7 @@ function App() {
       setCount(prev => {
         const next = prev + 1
         setHasClickedOnce(true)
+        setTotalClicks(t => t + 1)
         if (next >= (evolution * 10) + 40) {
           // Advance immediately and allow clicking to continue; show toast for feedback
           setEvolution(prev => prev + 1)
@@ -277,6 +294,12 @@ function App() {
             action: { label: 'Okay!', onClick: () => { /* noop */ } }
           })
         }
+        try {
+          achievementsService.checkAndUnlock({ count: next, evolution, hasClickedOnce: true, totalClicks: totalClicks + 1 }, (_id: string, title: string) => {
+            try { sound.play('achievement') } catch (e) { }
+            show({ message: `Achievement unlocked: ${title}`, duration: 3500 })
+          })
+        } catch (e) { }
         return next
       })
     }
@@ -284,9 +307,6 @@ function App() {
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [evolution, buttonDisabled, isShowing])
-
-
-  // local finalization handled via onClose passed to show()
 
   return (
     <div className="app">
@@ -328,18 +348,18 @@ function App() {
         <div className="sidebar-tabs-bottom">
           {isLoggedIn ? (
             <>
-              <SidebarButton icon={<IconSettings size={25} />} onClick={() => setSettingsOpen(true)}>
+              <SidebarButton icon={<IconSettings size={20} />} onClick={() => setSettingsOpen(true)}>
                 Settings
               </SidebarButton>
-              <SidebarButton icon={<IconStar size={25} />} onClick={() => setCreditsOpen(true)}>
+              <SidebarButton icon={<IconStar size={20} />} onClick={() => setCreditsOpen(true)}>
                 Credits
               </SidebarButton>
               {isStaff && (
-                <SidebarButton icon={<IconTools size={25} />} onClick={() => setStaffOpen(true)}>
+                <SidebarButton icon={<IconTools size={20} />} onClick={() => setStaffOpen(true)}>
                   Staff Panel
                 </SidebarButton>
               )}
-              <SidebarButton icon={<IconLogout size={25} />} onClick={() => {
+              <SidebarButton icon={<IconLogout size={20} />} onClick={() => {
                 auth.setToken(null)
                 setIsLoggedIn(false)
                 setServerLoaded(false)
@@ -350,26 +370,26 @@ function App() {
               }} danger>
                 Logout
               </SidebarButton>
-              <SidebarButton icon={<IconUserCircle size={25} />}>
+              <SidebarButton icon={<IconUserCircle size={20} />}>
                 {isStaff && <IconTools size={20} className="account-staff-icon" title="Staff" />}
                 {username}
               </SidebarButton>
             </>
           ) : (
             <>
-              <SidebarButton icon={<IconSettings size={25} />} onClick={() => setSettingsOpen(true)}>
+              <SidebarButton icon={<IconSettings size={20} />} onClick={() => setSettingsOpen(true)}>
                 Settings
               </SidebarButton>
-              <SidebarButton icon={<IconStar size={25} />} onClick={() => setCreditsOpen(true)}>
+              <SidebarButton icon={<IconStar size={20} />} onClick={() => setCreditsOpen(true)}>
                 Credits
               </SidebarButton>
-              <SidebarButton icon={<IconLogin size={25} />} onClick={() => setSignInOpen(true)}>
+              <SidebarButton icon={<IconLogin size={20} />} onClick={() => setSignInOpen(true)}>
                 Sign In
               </SidebarButton>
-              <SidebarButton icon={<IconUserPlus size={25} />} onClick={() => setRegisterOpen(true)}>
+              <SidebarButton icon={<IconUserPlus size={20} />} onClick={() => setRegisterOpen(true)}>
                 Register
               </SidebarButton>
-              <SidebarButton icon={<IconUserCircle size={25} />}>
+              <SidebarButton icon={<IconUserCircle size={20} />}>
                 Guest
               </SidebarButton>
             </>
@@ -447,12 +467,7 @@ function App() {
             )}
 
             {activeTab === 'achievements' && (
-              <Card>
-                <div style={{ padding: '1rem' }}>
-                  <h3>Achievements</h3>
-                  <p style={{ marginTop: '0.5rem' }}>No achievements yet.</p>
-                </div>
-              </Card>
+              <Achievements />
             )}
           </>
         )}

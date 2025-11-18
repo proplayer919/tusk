@@ -21,14 +21,28 @@ export async function loadProgress() {
 export async function saveProgress(progress: any) {
   const token = auth.getToken()
   if (!token) {
-    localStorage.setItem(LOCAL_KEY, JSON.stringify(progress))
+    // Merge with existing local progress so we don't accidentally wipe other keys
+    const raw = localStorage.getItem(LOCAL_KEY)
+    const existing = raw ? JSON.parse(raw) : {}
+    const merged = Object.assign({}, existing, progress)
+    localStorage.setItem(LOCAL_KEY, JSON.stringify(merged))
     return
   }
+
+  // When saving to server, merge with existing server-side progress first
+  const resGet = await fetch(API_BASE + '/api/progress', {
+    headers: { 'Authorization': `Bearer ${token}` }
+  })
+  let existing = null
+  if (resGet.ok) {
+    try { existing = (await resGet.json()).progress || {} } catch (e) { existing = {} }
+  }
+  const mergedProgress = Object.assign({}, existing || {}, progress)
 
   const res = await fetch(API_BASE + '/api/progress', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-    body: JSON.stringify({ progress })
+    body: JSON.stringify({ progress: mergedProgress })
   })
 
   // If server responds with non-OK, throw an error containing status and body
