@@ -13,8 +13,8 @@ const STORAGE_KEY = 'tusk_settings_v2'
 export const defaultSettings: Settings = {
   festiveEnabled: true,
   festiveOverride: false,
-  musicVolume: 0.6,
-  sfxVolume: 0.5,
+  musicVolume: 0.3,
+  sfxVolume: 0.4,
   showNowPlayingToasts: true,
 }
 

@@ -14,23 +14,23 @@ type MusicContextValue = {
 const MusicContext = createContext<MusicContextValue>({ playing: false, play: () => { }, pause: () => { }, setVolume: () => { }, getVolume: () => 1 })
 
 // Default playlist - user should add real files to public/music or update this list
-const DEFAULT_PLAYLIST: Array<{ name: string; src: string }> = [
-  { name: 'proplayer919 - borealis', src: '/music/borealis.wav' },
-  { name: 'proplayer919 - galaxies', src: '/music/galaxies.wav' },
-  { name: 'proplayer919 - meadows', src: '/music/meadows.wav' },
-  { name: 'Ferretosan - an opening to the vastness of space', src: '/music/actual1.wav' },
-  { name: 'Ferretosan - reminders of an older time', src: '/music/actual2.wav' },
-  { name: 'Ferretosan - reminders of an older time (remix)', src: '/music/actual2-remix.wav' },
+const DEFAULT_PLAYLIST: Array<{ name: string; src: string, volumeMultiplier: number }> = [
+  { name: 'proplayer919 - borealis', src: '/music/borealis.wav', volumeMultiplier: 1.0 },
+  { name: 'proplayer919 - galaxies', src: '/music/galaxies.wav', volumeMultiplier: 1.0 },
+  { name: 'proplayer919 - meadows', src: '/music/meadows.wav', volumeMultiplier: 1.0 },
+  { name: 'Ferretosan - an opening to the vastness of space', src: '/music/actual1.wav', volumeMultiplier: 0.7 },
+  { name: 'Ferretosan - reminders of an older time', src: '/music/actual2.wav', volumeMultiplier: 0.7 },
+  { name: 'Ferretosan - reminders of an older time (remix)', src: '/music/actual2-remix.wav', volumeMultiplier: 0.7 },
 ]
 
 function randInt(min: number, max: number) { return Math.floor(Math.random() * (max - min + 1)) + min }
 
-export function MusicProvider({ children, playlist = DEFAULT_PLAYLIST }: { children: React.ReactNode; playlist?: Array<{ name: string; src: string }> }) {
+export function MusicProvider({ children, playlist = DEFAULT_PLAYLIST }: { children: React.ReactNode; playlist?: Array<{ name: string; src: string, volumeMultiplier: number }> }) {
   const toast = useToast()
   const settings = settingsService.loadSettings()
   const [volume, setVolumeState] = useState<number>(settings.musicVolume ?? 0.6)
   const [playing, setPlaying] = useState(false)
-  const [current, setCurrent] = useState<{ name: string; src: string } | undefined>(undefined)
+  const [current, setCurrent] = useState<{ name: string; src: string, volumeMultiplier: number } | undefined>(undefined)
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const timeoutRef = useRef<number | null>(null)
   const startedRef = useRef<boolean>(false)
@@ -43,7 +43,7 @@ export function MusicProvider({ children, playlist = DEFAULT_PLAYLIST }: { child
         if (s) {
           if (typeof s.musicVolume === 'number') {
             setVolumeState(s.musicVolume)
-            try { if (audioRef.current) audioRef.current.volume = Math.max(0, Math.min(1, s.musicVolume)) } catch (e) { }
+            try { if (audioRef.current) audioRef.current.volume = Math.max(0, Math.min(1, s.musicVolume)) * (current?.volumeMultiplier ?? 1.0) } catch (e) { }
           }
         }
       } catch (err) { }
@@ -96,7 +96,7 @@ export function MusicProvider({ children, playlist = DEFAULT_PLAYLIST }: { child
     const a = new Audio(track.src)
     // ensure element is unmuted and has the expected volume
     try { a.muted = false } catch (e) { }
-    a.volume = Math.max(0, Math.min(1, volume))
+    a.volume = Math.max(0, Math.min(1, volume)) * (track.volumeMultiplier ?? 1.0)
     a.onended = () => {
       // wait random 3-15 seconds
       const delay = randInt(3, 15) * 1000
