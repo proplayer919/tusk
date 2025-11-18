@@ -18,6 +18,9 @@ const DEFAULT_PLAYLIST: Array<{ name: string; src: string }> = [
   { name: 'proplayer919 - borealis', src: '/music/borealis.wav' },
   { name: 'proplayer919 - galaxies', src: '/music/galaxies.wav' },
   { name: 'proplayer919 - meadows', src: '/music/meadows.wav' },
+  { name: 'Ferretosan - an opening to the vastness of space', src: '/music/actual1.wav' },
+  { name: 'Ferretosan - reminders of an older time', src: '/music/actual2.wav' },
+  { name: 'Ferretosan - reminders of an older time (remix)', src: '/music/actual2-remix.wav' },
 ]
 
 function randInt(min: number, max: number) { return Math.floor(Math.random() * (max - min + 1)) + min }
