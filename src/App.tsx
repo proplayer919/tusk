@@ -19,6 +19,9 @@ function App() {
   const { show, isShowing } = useToast()
   const [hasClickedOnce, setHasClickedOnce] = useState(false)
 
+  // active main content tab
+  const [activeTab, setActiveTab] = useState<'clicker' | 'statistics' | 'achievements'>('clicker')
+
   // hydration flag: don't auto-save until we've loaded initial progress
   const [hydrated, setHydrated] = useState(false)
   // serverLoaded: indicates we've fetched/applied server-side progress for logged-in users
@@ -303,13 +306,26 @@ function App() {
         </h1>
 
         {hasClickedOnce && (
-          <p className="evolution-label">
-            <IconLabel icon={<IconAward size={20} />}>Evolution {evolution}</IconLabel>
-          </p>
+          <>
+            <p className="evolution-label">
+              <IconLabel icon={<IconAward size={20} />}>Evolution {evolution}</IconLabel>
+            </p>
+
+            <div className="sidebar-tabs">
+              <SidebarButton icon={<IconAward size={20} />} onClick={() => setActiveTab('clicker')} active={activeTab === 'clicker'}>
+                Clicker
+              </SidebarButton>
+              <SidebarButton icon={<IconClock size={20} />} onClick={() => setActiveTab('statistics')} active={activeTab === 'statistics'}>
+                Statistics
+              </SidebarButton>
+              <SidebarButton icon={<IconStar size={20} />} onClick={() => setActiveTab('achievements')} active={activeTab === 'achievements'}>
+                Achievements
+              </SidebarButton>
+            </div>
+          </>
         )}
 
-        {/* Inlined account area: styled buttons and account row at the bottom */}
-        <div className="sidebar-account-section">
+        <div className="sidebar-tabs-bottom">
           {isLoggedIn ? (
             <>
               <SidebarButton icon={<IconSettings size={25} />} onClick={() => setSettingsOpen(true)}>
@@ -371,7 +387,7 @@ function App() {
               </div>
               <div className="locked-card-title">
                 <h2>Account locked</h2>
-                <div className="locked-card-subtext">Access to the clicker area is currently restricted.</div>
+                <div className="locked-card-subtext">Your account has been locked for violating the rules of Tusk.</div>
               </div>
             </div>
 
@@ -409,9 +425,35 @@ function App() {
           </div></Card>
         ) : (
           <>
-            <Button onClick={handleClick} disabled={buttonDisabled}>{count ? `You have clicked ${count} times` : 'Click Me!'}</Button>
+            {activeTab === 'clicker' && (
+              <>
+                <Button onClick={handleClick} disabled={buttonDisabled}>{count ? `You have clicked ${count} times` : 'Click Me!'}</Button>
 
-            <ProgressBar value={count / getMaxCount()} showValue maxValue={getMaxCount()} animated />
+                <ProgressBar value={count / getMaxCount()} showValue maxValue={getMaxCount()} animated />
+              </>
+            )}
+
+            {activeTab === 'statistics' && (
+              <Card>
+                <div style={{ padding: '1rem' }}>
+                  <h3>Statistics</h3>
+                  <div style={{ marginTop: '0.5rem' }}>
+                    <div style={{ marginBottom: '0.5rem' }}>Evolution: <strong>{evolution}</strong></div>
+                    <div style={{ marginBottom: '0.5rem' }}>Clicks: <strong>{count}/{getMaxCount()}</strong></div>
+                    <ProgressBar value={count / getMaxCount()} showValue maxValue={getMaxCount()} animated />
+                  </div>
+                </div>
+              </Card>
+            )}
+
+            {activeTab === 'achievements' && (
+              <Card>
+                <div style={{ padding: '1rem' }}>
+                  <h3>Achievements</h3>
+                  <p style={{ marginTop: '0.5rem' }}>No achievements yet.</p>
+                </div>
+              </Card>
+            )}
           </>
         )}
       </main>

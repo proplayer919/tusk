@@ -9,7 +9,7 @@
   padding-bottom: 0.6rem;
   border-radius: 8px;
   font-weight: 600;
-  transition: background 120ms ease;
+  transition: background 120ms ease, color 120ms ease;
   text-align: left;
   width: 100%;
   font-size: 1rem;
@@ -21,7 +21,11 @@
 }
 
 .sidebar-button.danger {
-  color: var(--danger, #d9534f);
+  color: var(--danger);
+}
+
+.sidebar-button.active {
+  color: var(--primary);
 }
 
 /* Ensure labels truncate on tiny screens */

@@ -97,9 +97,16 @@
 }
 
 /* Styles for the inlined account area at the bottom of the sidebar */
-.sidebar-account-section {
+.sidebar-tabs-bottom {
   margin-top: auto;
   padding-bottom: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+/* Tabs placed under the evolution label; use the same layout as the account buttons */
+.sidebar-tabs {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
